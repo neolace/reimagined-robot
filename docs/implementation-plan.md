@@ -153,7 +153,7 @@ Most of this work is external lead time. Start it first, because the vendors wil
 **Acceptance criteria**
 
 - [ ] If a file with identical content is dropped into `temp/` twice, the parent folder ends up with one object and `temp/` is empty.
-- [ ] If a file with changed content is dropped in, the parent object is replaced (and the previous version kept by versioning), and the `md5` metadata is updated.
+- [ ] If a file with new content is dropped in, it's stored in the parent folder as a date-stamped copy with `md5` metadata, and no existing file changes.
 - [ ] Processing the same event twice doesn't cause an error or change the outcome (idempotent).
 
 ---

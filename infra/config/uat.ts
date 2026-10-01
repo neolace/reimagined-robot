@@ -8,7 +8,7 @@ export const uatConfig: EnvironmentConfig = {
   account: process.env.PRIME_UAT_ACCOUNT ?? '222222222222', // REPLACE_ME
   region: 'af-south-1',
   logRetention: RetentionDays.ONE_MONTH,
-  alarmEmails: ['prime-ingestion-uat@example.com'], // REPLACE_ME
+  alarmEmails: ['tertius.geldenhuys@standardbank.co.za'],
   fileDeadline: { hour: 7, minute: 0 },
   jse: {
     sftpUrl: 'sftp://jse-idp-uat.example.invalid:22', // REPLACE_ME

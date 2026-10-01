@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | State machines | `/aws/vendedlogs/states/<name>` | 30 · 90 days | Level `ERROR`, execution data excluded (paths only, no content) |
 | Date Lambda | `/aws/lambda/gm-prime-equities-date` | 30 · 90 days | Powertools Logger (TS), JSON |
-| Shadow-Rename | `/aws/lambda/Shadow-Rename` | 30 · 90 days | Powertools Logger (Python), JSON; keys `temp_key`, `target_key`, `md5`, `action` |
+| Shadow-Rename | `/aws/lambda/Shadow-Rename` | 30 · 90 days | Powertools Logger (Python), JSON; keys `temp_key`, `target_key`, `duplicate_of`, `md5`, `action` |
 | Transfer connectors | `/aws/transfer/<connector-id>` | 30 · 90 days | Connection and transfer events |
 | API activity | Organisation CloudTrail | Org policy | |
 
@@ -15,7 +15,7 @@ X-Ray tracing is enabled on the state machines and both Lambdas.
 **Useful Logs Insights query** (what Shadow-Rename did today):
 
 ```text
-fields @timestamp, action, temp_key, target_key, md5
+fields @timestamp, action, temp_key, target_key, duplicate_of, md5
 | filter ispresent(action)
 | sort @timestamp desc
 ```
@@ -38,12 +38,12 @@ All alarms go to one SNS topic per environment, `prime-{env}-ingestion-alerts`, 
 
 CloudWatch alarms can't express "by 07:00 on a weekday", so a small **TypeScript** Lambda, `gm-prime-file-deadline-check`, runs on an EventBridge Scheduler cron at `cfg.fileDeadline` (default `cron(0 7 ? * MON-FRI *)`, `Africa/Johannesburg`). For each feed it calls `HeadObject` on the expected final key:
 
-- JSE feeds: the fixed target key; it must have a `LastModified` on today's SAST date.
+- JSE feeds: a copy stamped with today's SAST date must exist, for example a key starting `jse/idp/bda/BDA_FILE_20261001T` ([ADR-010](../architecture/decisions.md#adr-010-shadow-rename-stores-date-stamped-copies-and-never-overwrites)).
 - A2X: the date-stamped key for today's `businessDate`.
 
 For each feed that's missing, it publishes to the alerts SNS topic and emits a `FileMissing` custom metric (dimension `Feed`).
 
-> **Assumption:** each day's JSE file differs from the previous day's. If a feed can legitimately repeat the same content, Shadow-Rename discards it and `LastModified` won't move. In that case, have Shadow-Rename write a `last-seen` metadata tag or a marker object instead.
+> **Assumption:** each day's JSE file differs from every earlier file in its folder. If a feed can legitimately repeat earlier content, Shadow-Rename discards it as a duplicate, nothing is stamped with that day's date, and the check sends a false alert. In that case, have Shadow-Rename also write a small marker object for each day it sees the file.
 
 ## Dashboard
 
@@ -98,7 +98,7 @@ aws transfer test-connection --connector-id <connector-id>
 - **Scheduler DLQs:** the scheduler couldn't start the state machine, usually because of IAM or a deleted target. Read the message attributes for the error, fix it, then run the feed by hand. Delete the messages once handled.
 - **Shadow-Rename DLQ:** each message body is the original S3 EventBridge event.
   1. Find the error in the Shadow-Rename logs, using the `temp_key`.
-  2. Fix the cause (for example permissions).
+  2. Fix the cause (for example permissions). A `FileExistsError` means a file with the same date-stamped name, but different content, is already in the parent folder. Shadow-Rename won't overwrite it, so find out where that file came from before you reprocess.
   3. Reprocess by invoking the Lambda with the event from the message (it's idempotent):
 
      ```bash
@@ -110,16 +110,14 @@ aws transfer test-connection --connector-id <connector-id>
 
 ### Wrong file promoted
 
-S3 versioning keeps previous versions for 90 days.
+Shadow-Rename never overwrites, so the wrong file is its own date-stamped copy and the earlier copies are untouched. Wait until the vendor has fixed the file, or [pause ingestion](#pause-ingestion) first; otherwise the next pull stores the wrong file again. Then delete the wrong copy:
 
 ```bash
-aws s3api list-object-versions --bucket prime-<env>-file-downloads --prefix jse/idp/bda/<file>
-aws s3api copy-object --bucket prime-<env>-file-downloads --key jse/idp/bda/<file> \
-  --copy-source "prime-<env>-file-downloads/jse/idp/bda/<file>?versionId=<good-version-id>" \
-  --metadata-directive COPY
+aws s3api list-objects-v2 --bucket prime-<env>-file-downloads --prefix jse/idp/bda/ --delimiter /
+aws s3api delete-object --bucket prime-<env>-file-downloads --key jse/idp/bda/<name>_<YYYYMMDDTHHMMSS>.csv
 ```
 
-Tell the downstream consumers about the correction.
+S3 versioning keeps the deleted copy as a noncurrent version for 90 days. Tell the downstream consumers about the correction.
 
 ### Backfill a missed day
 

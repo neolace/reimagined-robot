@@ -35,7 +35,7 @@ npx cdk bootstrap aws://<ACCOUNT_ID>/<REGION> \
 | Bucket name | `prime-dev-file-downloads` | `prime-uat-file-downloads` | `prime-prod-file-downloads` |
 | Log retention | 30 days | 30 days | 90 days |
 | Schedules enabled | Optional (off by default to save vendor calls) | On | On |
-| Alarm notifications | Team channel | Team channel | Team channel + on-call |
+| Alarm notifications | Email to `tertius.geldenhuys@standardbank.co.za` | Email to `tertius.geldenhuys@standardbank.co.za` | Email to `tertius.geldenhuys@standardbank.co.za` |
 | `RemovalPolicy` on bucket and key | `RETAIN` | `RETAIN` | `RETAIN` |
 | Connector egress IPs | Allowlisted on vendor test endpoints | Allowlisted on vendor UAT | Allowlisted on vendor prod |
 
@@ -126,4 +126,4 @@ flowchart LR
 
 - **Code or config regression:** revert the commit and let the pipeline redeploy. Every resource is declarative.
 - **Urgent stop:** disable the schedules (set `enabled: false` in config and redeploy, or as a temporary measure `aws scheduler update-schedule ... --state DISABLED`, then make the matching config change).
-- **Bad file promoted by Shadow-Rename:** restore the previous object version from S3 versioning ([runbook](observability-and-runbook.md#wrong-file-promoted)).
+- **Bad file promoted by Shadow-Rename:** delete the wrong date-stamped copy; earlier copies are never changed ([runbook](observability-and-runbook.md#wrong-file-promoted)).

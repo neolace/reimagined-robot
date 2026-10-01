@@ -13,14 +13,23 @@ export interface FeedConfig {
   readonly schedule: CronOptions;
 }
 
-export interface VendorConfig {
-  /** e.g. "sftp://sftp.vendor.example:22" */
-  readonly sftpUrl: string;
-  /** Host public keys supplied by the vendor out-of-band. Never trust-on-first-use. */
-  readonly trustedHostKeys: string[];
+interface VendorConfigBase {
   /** Transfer Family FailureCode meaning "remote file does not exist" (confirmed by the Phase 2 spike). */
   readonly fileNotFoundFailureCode: string;
 }
+
+export type VendorConfig = VendorConfigBase &
+  (
+    | { readonly connectorId: string }
+    | {
+        /** e.g. "sftp://sftp.vendor.example:22" */
+        readonly sftpUrl: string;
+        /** Host public keys supplied by the vendor out-of-band. Never trust-on-first-use. */
+        readonly trustedHostKeys: string[];
+      }
+  );
+
+export type VendorEndpointConfig = Extract<VendorConfig, { readonly sftpUrl: string }>;
 
 export interface EnvironmentConfig {
   readonly envName: EnvName;

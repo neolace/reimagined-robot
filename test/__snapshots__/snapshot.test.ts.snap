@@ -99,9 +99,9 @@ exports[`template snapshots (prod) monitoring 1`] = `
       },
       "Type": "AWS::SNS::TopicPolicy",
     },
-    "AlertTopicprimeingestionalertsexamplecomD4FC183C": {
+    "AlertTopictertiusgeldenhuysstandardbankcoza115505FA": {
       "Properties": {
-        "Endpoint": "prime-ingestion-alerts@example.com",
+        "Endpoint": "tertius.geldenhuys@standardbank.co.za",
         "Protocol": "email",
         "TopicArn": {
           "Ref": "AlertTopic2720D535",
@@ -621,7 +621,7 @@ exports[`template snapshots (prod) monitoring 1`] = `
             "BUCKET_NAME": {
               "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
             },
-            "FEEDS": "[{"feed":"bda","kind":"fixed","key":"jse/idp/bda/BDA_FILE.csv"},{"feed":"marketData","kind":"fixed","key":"jse/idp/market-data/equities/EQUITIES_FILE.csv"},{"feed":"referenceData","kind":"fixed","key":"jse/idp/market-data/reference/REFERENCE_FILE.csv"},{"feed":"optionsData","kind":"fixed","key":"jse/idp/market-data/options/OPTIONS_FILE.csv"},{"feed":"a2x","kind":"dated","key":"a2x/ftp/reference-data/equities/EQ_REF_{}.csv"}]",
+            "FEEDS": "[{"feed":"bda","kind":"stamped","key":"jse/idp/bda/BDA_FILE.csv"},{"feed":"marketData","kind":"stamped","key":"jse/idp/market-data/equities/EQUITIES_FILE.csv"},{"feed":"referenceData","kind":"stamped","key":"jse/idp/market-data/reference/REFERENCE_FILE.csv"},{"feed":"optionsData","kind":"stamped","key":"jse/idp/market-data/options/OPTIONS_FILE.csv"},{"feed":"a2x","kind":"dated","key":"a2x/ftp/reference-data/equities/EQ_REF_{}.csv"}]",
             "POWERTOOLS_LOG_LEVEL": "INFO",
             "POWERTOOLS_METRICS_NAMESPACE": "PrimeSftpIngestion",
             "POWERTOOLS_SERVICE_NAME": "gm-prime-file-deadline-check",

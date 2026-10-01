@@ -1,7 +1,8 @@
 import { Stage, StageProps, Tags, Validations } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import type { EnvironmentConfig } from '../config';
+import type { EnvironmentConfig, VendorConfig } from '../config';
 import { AwsSolutionsPlugin } from './nag';
+import type { TransferConnectorReference } from './constructs/retrieve-file-state-machine';
 import { MonitoringStack } from './stacks/monitoring-stack';
 import { OrchestrationStack } from './stacks/orchestration-stack';
 import { ProcessingStack } from './stacks/processing-stack';
@@ -12,10 +13,10 @@ export interface IngestionStageProps extends StageProps {
   readonly config: EnvironmentConfig;
 }
 
-/** One complete environment: Storage → Transfer → Orchestration + Processing → Monitoring. */
+/** One complete environment: Storage → optional Transfer → Orchestration + Processing → Monitoring. */
 export class IngestionStage extends Stage {
   public readonly storage: StorageStack;
-  public readonly transfer: TransferStack;
+  public readonly transfer: TransferStack | undefined;
   public readonly orchestration: OrchestrationStack;
   public readonly processing: ProcessingStack;
   public readonly monitoring: MonitoringStack;
@@ -25,16 +26,32 @@ export class IngestionStage extends Stage {
     const { config } = props;
 
     this.storage = new StorageStack(this, 'Storage', { config });
-    this.transfer = new TransferStack(this, 'Transfer', {
-      config,
-      bucket: this.storage.bucket,
-      dataKey: this.storage.dataKey,
-    });
+    this.transfer = [config.jse, config.a2x].some((vendor) => 'sftpUrl' in vendor)
+      ? new TransferStack(this, 'Transfer', {
+          config,
+          bucket: this.storage.bucket,
+          dataKey: this.storage.dataKey,
+        })
+      : undefined;
+    const referenceFor = (vendor: VendorConfig): TransferConnectorReference => {
+      if ('connectorId' in vendor) {
+        return {
+          connectorId: vendor.connectorId,
+          connectorArn: this.storage.formatArn({
+            service: 'transfer',
+            resource: 'connector',
+            resourceName: vendor.connectorId,
+          }),
+        };
+      }
+      throw new Error('A provisioned Transfer Family connector reference is missing.');
+    };
+
     this.orchestration = new OrchestrationStack(this, 'Orchestration', {
       config,
       bucket: this.storage.bucket,
-      jseConnector: this.transfer.jseConnector,
-      a2xConnector: this.transfer.a2xConnector,
+      jseConnector: this.transfer?.jseConnector ?? referenceFor(config.jse),
+      a2xConnector: this.transfer?.a2xConnector ?? referenceFor(config.a2x),
     });
     this.processing = new ProcessingStack(this, 'Processing', { config, bucket: this.storage.bucket });
     this.monitoring = new MonitoringStack(this, 'Monitoring', {

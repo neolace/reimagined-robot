@@ -16,7 +16,7 @@ This is the build spec for each component in the [architecture](../../README.md#
 | Encryption | SSE-KMS with a customer-managed key and S3 Bucket Keys | Key policy control and audit; Bucket Keys cut KMS request cost |
 | Public access | Block all | |
 | Transport | `enforceSSL: true` (denies `aws:SecureTransport = false`) | |
-| Versioning | Enabled | Recovers from a bad overwrite by Shadow-Rename |
+| Versioning | Enabled | Recovers objects that are deleted or overwritten by mistake. Shadow-Rename itself never overwrites ([ADR-010](decisions.md#adr-010-shadow-rename-stores-date-stamped-copies-and-never-overwrites)) |
 | EventBridge notifications | Enabled | Triggers Shadow-Rename |
 | Lifecycle | `*/temp/` objects expire after 7 days; noncurrent versions expire after 90 days; incomplete multipart uploads are aborted after 1 day | Keeps staging clean and limits version storage |
 | Removal policy | `RETAIN` (all envs), plus `autoDeleteObjects` only in dev if wanted | Stops `cdk destroy` from deleting data |
@@ -30,6 +30,8 @@ This is the build spec for each component in the [architecture](../../README.md#
 | JSE market data: equities | `jse/idp/market-data/equities/temp/` | `jse/idp/market-data/equities/` |
 | JSE market data: reference | `jse/idp/market-data/reference/temp/` | `jse/idp/market-data/reference/` |
 | JSE market data: options | `jse/idp/market-data/options/temp/` | `jse/idp/market-data/options/` |
+
+In the final prefix, each JSE file is a date-stamped copy, for example `jse/idp/bda/BDA_FILE_20261001T033012.csv` ([Shadow-Rename](#7-shadow-rename-lambda-python)).
 
 ```ts
 const dataKey = new kms.Key(this, 'DataKey', {
@@ -65,12 +67,12 @@ const bucket = new s3.Bucket(this, 'FileDownloads', {
 
 ## 2. Secrets Manager
 
-One secret per vendor per environment, encrypted with `dataKey`. CDK creates the secret, but **the value is set out-of-band** (`aws secretsmanager put-secret-value`) so credentials never go into the repo or the CloudFormation templates.
+For environments where CDK provisions connectors, create one secret per vendor, encrypted with `dataKey`. CDK creates the secret, but **the value is set out-of-band** (`aws secretsmanager put-secret-value`) so credentials never go into the repo or CloudFormation templates. Dev references existing connectors, so their credentials and secrets remain managed with those connectors outside this stack.
 
 | Secret name | Used by |
 | --- | --- |
-| `prime/{env}/sftp/a2x` | A2X SFTP connector |
-| `prime/{env}/sftp/jse-idp` | JSE IDP SFTP connector |
+| `prime/{env}/sftp/a2x` | A2X SFTP connector in uat/prod |
+| `prime/{env}/sftp/jse-idp` | JSE IDP SFTP connector in uat/prod |
 
 The value must use the JSON format Transfer Family expects. Key authentication is preferred:
 
@@ -101,11 +103,14 @@ Rotation happens by hand, driven by the vendor. The procedure is in the [runbook
 | Setting | A2X | JSE IDP |
 | --- | --- | --- |
 | Logical name | `A2xSftpConnector` | `JseIdpSftpConnector` |
-| `Url` | `cfg.a2x.sftpUrl` (`sftp://host:22`) | `cfg.jse.sftpUrl` |
-| `SftpConfig.UserSecretId` | `prime/{env}/sftp/a2x` | `prime/{env}/sftp/jse-idp` |
-| `SftpConfig.TrustedHostKeys` | `cfg.a2x.trustedHostKeys` | `cfg.jse.trustedHostKeys` |
-| Access role | `a2x-connector-access-role` | `jse-connector-access-role` |
-| Logging role | shared `transfer-connector-logging-role` | same |
+| Connection mode | Existing connector ID in dev; created by CDK in uat/prod | Existing connector ID in dev; created by CDK in uat/prod |
+| `Url` when provisioned | `cfg.a2x.sftpUrl` (`sftp://host:22`) | `cfg.jse.sftpUrl` |
+| `SftpConfig.UserSecretId` when provisioned | `prime/{env}/sftp/a2x` | `prime/{env}/sftp/jse-idp` |
+| `SftpConfig.TrustedHostKeys` when provisioned | `cfg.a2x.trustedHostKeys` | `cfg.jse.trustedHostKeys` |
+| Access role when provisioned | `a2x-connector-access-role` | `jse-connector-access-role` |
+| Logging role when provisioned | shared `transfer-connector-logging-role` | same |
+
+Dev uses the pre-existing JSE and A2X connector IDs in `infra/config/dev.ts`. When both connectors are imported, the stage omits the Transfer stack and does not manage those connectors, their secrets, access roles, logging role, or egress IP outputs. Their access roles must already allow writing to the app's S3 landing prefixes. Uat and prod continue to provision connectors and their supporting resources from endpoint and pinned-host-key configuration.
 
 **Host keys** must be pinned with values obtained out-of-band from the vendor. You can check them, but not replace them, with `ssh-keyscan -p 22 <host>`.
 
@@ -138,6 +143,7 @@ jseAccessRole.addToPolicy(new iam.PolicyStatement({
 }));
 jseSecret.grantRead(jseAccessRole);                    // also grants kms:Decrypt on dataKey
 
+// Provisioned environments (uat/prod) create the connector from endpoint configuration.
 const jseConnector = new transfer.CfnConnector(this, 'JseIdpSftpConnector', {
   url: cfg.jse.sftpUrl,
   accessRole: jseAccessRole.roleArn,
@@ -444,7 +450,7 @@ new scheduler.Schedule(this, 'BdaSchedule', {
 
 ## 7. Shadow-Rename Lambda (Python)
 
-**Purpose.** The JSE flows land files in `temp/`, and the bda feed re-downloads the same file every 30 minutes. Shadow-Rename promotes a file to its parent folder only when its content has changed, and discards exact duplicates.
+**Purpose.** The JSE flows land files in `temp/`, and the bda feed re-downloads the same file every 30 minutes. Shadow-Rename stores a file in its parent folder as a new date-stamped copy only when its content is new, and discards duplicates. It never overwrites a file ([ADR-010](decisions.md#adr-010-shadow-rename-stores-date-stamped-copies-and-never-overwrites)).
 
 | Setting | Value |
 | --- | --- |
@@ -454,77 +460,78 @@ new scheduler.Schedule(this, 'BdaSchedule', {
 | Trigger | EventBridge rule: `aws.s3` `Object Created`, bucket = `prime-{env}-file-downloads`, key wildcard `jse/idp/*/temp/*` |
 | Concurrency | Reserved concurrency **1**, which serialises processing so two copies of the same file can't race |
 | Failure handling | EventBridge target retry (4 attempts, max age 2 h), then SQS DLQ |
-| Permissions | `s3:GetObject` on `jse/idp/*`, `s3:PutObject` on `jse/idp/*`, `s3:DeleteObject` on `jse/idp/*/temp/*`, KMS decrypt and encrypt on `dataKey` |
+| Permissions | `s3:ListBucket` on the bucket, `s3:GetObject` on `jse/idp/*`, `s3:PutObject` on `jse/idp/*`, `s3:DeleteObject` on `jse/idp/*/temp/*`, KMS decrypt and encrypt on `dataKey` |
 | Packaging | `lambda.Function` with `pythonCode()` ([python-code.ts](../../infra/lib/constructs/python-code.ts)): local `pip install --platform manylinux2014_aarch64 --only-binary=:all:`, falling back to Docker only if no local Python is available ([ADR-008](decisions.md#adr-008-bundle-python-with-local-pip-not-docker)) |
 
 **Algorithm** (the diagram's `lambda_handler` → `file_exists`):
 
 1. Get `bucket` and `key` from the event. The key has the form `<folder>/temp/<name>`.
-2. Stream the object and compute its md5. Don't use the S3 ETag: under SSE-KMS or multipart upload the ETag isn't the md5.
-3. Target key: `<folder>/<name>`. Read its `md5` user metadata with `HeadObject` (that's `file_exists`).
-4. If the target exists **and** its md5 matches: delete the temp object (duplicate).
-5. Otherwise: copy temp → target with metadata `md5=<digest>` (`MetadataDirective=REPLACE`), then delete the temp object. Versioning keeps the previous target.
+2. Stream the object and compute its md5. Don't use the S3 ETag: under SSE-KMS or multipart upload the ETag isn't the md5. Keep the object's `LastModified`, which is when the file was retrieved.
+3. List the files directly inside `<folder>/` (not `temp/`) and read their `md5` user metadata with `HeadObject`, newest first, until one matches (that's `file_exists`). Files without `md5` metadata never match.
+4. If a file matches: delete the temp object (duplicate).
+5. Otherwise build the target key `<folder>/<stem>_<YYYYMMDDTHHMMSS><extension>` from the retrieval time in SAST, for example `jse/idp/bda/BDA_FILE_20261001T033012.csv`. If that key already exists, raise `FileExistsError` and leave everything in place. Otherwise copy temp → target with metadata `md5=<digest>` (`MetadataDirective=REPLACE`), then delete the temp object.
 6. If the temp object is already gone (`NoSuchKey`), the event was redelivered and already handled. Log it and return success.
 
 ```python
-# src/lambdas/shadow_rename/app.py
-import hashlib
-
-import boto3
-from aws_lambda_powertools import Logger
-from botocore.exceptions import ClientError
-
-logger = Logger(service="shadow-rename")
-s3 = boto3.client("s3")
-
-CHUNK_SIZE = 8 * 1024 * 1024
-MD5_METADATA_KEY = "md5"
-TEMP_SEGMENT = "/temp/"
-NOT_FOUND = {"404", "NoSuchKey", "NotFound"}
+# src/lambdas/shadow_rename/app.py (abridged)
+SAST = timezone(timedelta(hours=2), "SAST")  # no daylight saving time (ADR-006), so no tz database is needed
+STAMP_FORMAT = "%Y%m%dT%H%M%S"
 
 
-def target_key_for(temp_key: str) -> str:
-    folder, _, name = temp_key.rpartition(TEMP_SEGMENT)
-    return f"{folder}/{name}"
+def split_temp_key(temp_key: str) -> tuple[str, str]:
+    """``jse/idp/bda/temp/FILE.csv`` -> ``("jse/idp/bda/", "FILE.csv")``."""
+    folder, separator, name = temp_key.rpartition(TEMP_SEGMENT)
+    if not separator or not name:
+        raise ValueError(f"Key is not inside a temp/ folder: {temp_key}")
+    return f"{folder}/", name
 
 
-def md5_of_object(bucket: str, key: str) -> str:
-    body = s3.get_object(Bucket=bucket, Key=key)["Body"]
-    digest = hashlib.md5(usedforsecurity=False)
-    for chunk in iter(lambda: body.read(CHUNK_SIZE), b""):
-        digest.update(chunk)
-    return digest.hexdigest()
+def target_key_for(temp_key: str, retrieved_at: datetime) -> str:
+    folder, name = split_temp_key(temp_key)
+    stem, extension = posixpath.splitext(name)
+    return f"{folder}{stem}_{retrieved_at.astimezone(SAST).strftime(STAMP_FORMAT)}{extension}"
 
 
-def file_exists(bucket: str, key: str) -> str | None:
-    """Return the stored md5 of the target object, or None if it does not exist."""
-    try:
-        return s3.head_object(Bucket=bucket, Key=key)["Metadata"].get(MD5_METADATA_KEY)
-    except ClientError as err:
-        if err.response["Error"]["Code"] in NOT_FOUND:
-            return None
-        raise
+def file_exists(bucket: str, folder: str, md5: str) -> str | None:
+    """Return the key of a file directly inside ``folder`` whose md5 matches, or None. Newest files first."""
+    files = []
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=bucket, Prefix=folder, Delimiter="/"):
+        files.extend(page.get("Contents", []))
+    for item in sorted(files, key=lambda f: f["LastModified"], reverse=True):
+        if stored_md5(bucket, item["Key"]) == md5:
+            return item["Key"]
+    return None
 
 
 @logger.inject_lambda_context
 def lambda_handler(event, _context):
     bucket = event["detail"]["bucket"]["name"]
     temp_key = event["detail"]["object"]["key"]
-    target_key = target_key_for(temp_key)
-    logger.append_keys(temp_key=temp_key, target_key=target_key)
+    folder, _ = split_temp_key(temp_key)
+    logger.append_keys(temp_key=temp_key)
 
     try:
-        new_md5 = md5_of_object(bucket, temp_key)
+        new_md5, retrieved_at = md5_of_object(bucket, temp_key)  # streamed, 8 MiB chunks
     except ClientError as err:
         if err.response["Error"]["Code"] in NOT_FOUND:
-            logger.info("Temp object already processed")
+            logger.info("Temp object already processed", extra={"action": "noop"})
             return {"action": "noop"}
         raise
 
-    if file_exists(bucket, target_key) == new_md5:
+    duplicate_of = file_exists(bucket, folder, new_md5)
+    if duplicate_of:
         s3.delete_object(Bucket=bucket, Key=temp_key)
-        logger.info("Duplicate discarded", extra={"md5": new_md5})
-        return {"action": "discarded", "md5": new_md5}
+        logger.info("Duplicate discarded", extra={"action": "discarded", "md5": new_md5, "duplicate_of": duplicate_of})
+        return {"action": "discarded", "md5": new_md5, "duplicate_of": duplicate_of}
+
+    target_key = target_key_for(temp_key, retrieved_at)
+    try:
+        s3.head_object(Bucket=bucket, Key=target_key)
+    except ClientError as err:
+        if err.response["Error"]["Code"] not in NOT_FOUND:
+            raise
+    else:
+        raise FileExistsError(f"{target_key} already exists with different content; Shadow-Rename never overwrites")
 
     s3.copy(
         CopySource={"Bucket": bucket, "Key": temp_key},
@@ -533,8 +540,8 @@ def lambda_handler(event, _context):
         ExtraArgs={"Metadata": {MD5_METADATA_KEY: new_md5}, "MetadataDirective": "REPLACE"},
     )
     s3.delete_object(Bucket=bucket, Key=temp_key)
-    logger.info("File promoted", extra={"md5": new_md5})
-    return {"action": "promoted", "md5": new_md5}
+    logger.info("File promoted", extra={"action": "promoted", "md5": new_md5, "target_key": target_key})
+    return {"action": "promoted", "md5": new_md5, "target_key": target_key}
 ```
 
 > **Confirm during Phase 4** whether the object key in S3 EventBridge events arrives URL-encoded. If it does, apply `urllib.parse.unquote_plus`. Vendor file names without spaces or special characters avoid the issue.

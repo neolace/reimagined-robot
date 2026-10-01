@@ -14,17 +14,19 @@
  */
 import { createHash, randomUUID } from 'crypto';
 import { readFileSync } from 'fs';
+import { posix } from 'path';
 import { DescribeExecutionCommand, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { HeadObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import SftpClient from 'ssh2-sftp-client';
-import { bucketNameFor, devConfig, ENVIRONMENTS, finalKeyFor, JSE_FEEDS } from '../../infra/config';
+import { bucketNameFor, devConfig, ENVIRONMENTS, JSE_FEEDS } from '../../infra/config';
 
 const env = process.env.PRIME_ENV ?? 'dev';
 const config = ENVIRONMENTS.find((c) => c.envName === env) ?? devConfig;
 const bucket = bucketNameFor(config.envName);
 const bda = JSE_FEEDS.find((f) => f.id === 'bda')!;
 const remotePath = config.jse.feeds.bda.remotePath;
-const targetKey = finalKeyFor(bda.prefix, remotePath);
+/** Shadow-Rename stores each new version as `<name>_<YYYYMMDDTHHMMSS><extension>` in the parent folder. */
+const copyPrefix = `${bda.prefix}${posix.parse(remotePath).name}_`;
 const stateMachineArn = `arn:aws:states:${config.region}:${config.account}:stateMachine:${bda.stateMachineName}`;
 
 const sfnClient = new SFNClient({ region: config.region });
@@ -73,13 +75,21 @@ const runExecution = async (input: object): Promise<{ status: string; output?: s
   });
 };
 
-const targetMd5 = async (): Promise<{ md5?: string; versionId?: string } | undefined> => {
-  try {
-    const head = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: targetKey }));
-    return { md5: head.Metadata?.md5, versionId: head.VersionId };
-  } catch {
-    return undefined;
-  }
+interface Copy {
+  key: string;
+  md5?: string;
+  versionId?: string;
+}
+
+/** Date-stamped copies of the bda file in its parent folder, with their md5 metadata. */
+const copies = async (): Promise<Copy[]> => {
+  const listing = await s3.send(new ListObjectsV2Command({ Bucket: bucket, Prefix: copyPrefix }));
+  return Promise.all(
+    (listing.Contents ?? []).map(async ({ Key }) => {
+      const head = await s3.send(new HeadObjectCommand({ Bucket: bucket, Key }));
+      return { key: Key!, md5: head.Metadata?.md5, versionId: head.VersionId };
+    }),
+  );
 };
 
 const tempIsEmpty = async (): Promise<boolean> => {
@@ -91,39 +101,38 @@ const md5 = (content: string) => createHash('md5').update(content).digest('hex')
 
 describeIfConfigured(`bda retrieval and Shadow-Rename (${config.envName})`, () => {
   const first = `integration ${new Date().toISOString()} ${randomUUID()}\n`;
-  let firstVersion: string | undefined;
+  let firstCopy: Copy | undefined;
 
-  test('a new file is retrieved and promoted with md5 metadata', async () => {
+  test('a new file is stored as a date-stamped copy with md5 metadata', async () => {
     await uploadFixture(first);
 
     const execution = await runExecution({ remoteFilePaths: [remotePath] });
     expect(execution.status).toBe('SUCCEEDED');
 
-    const target = await until('promoted file', async () => {
-      const head = await targetMd5();
-      return head?.md5 === md5(first) && (await tempIsEmpty()) ? head : undefined;
+    firstCopy = await until('stamped copy', async () => {
+      const copy = (await copies()).find((c) => c.md5 === md5(first));
+      return copy && (await tempIsEmpty()) ? copy : undefined;
     });
-    firstVersion = target.versionId;
+    expect(firstCopy.key.slice(copyPrefix.length)).toMatch(/^\d{8}T\d{6}/);
   });
 
   test('retrieving the same content again is discarded as a duplicate', async () => {
+    const before = (await copies()).length;
     const execution = await runExecution({ remoteFilePaths: [remotePath] });
     expect(execution.status).toBe('SUCCEEDED');
 
     await until('temp/ to be emptied', async () => ((await tempIsEmpty()) ? true : undefined));
-    expect((await targetMd5())?.versionId).toBe(firstVersion);
+    expect(await copies()).toHaveLength(before);
   });
 
-  test('changed content is promoted as a new version', async () => {
+  test('changed content is stored as a new copy and the first copy is kept', async () => {
     const second = `${first}changed\n`;
     await uploadFixture(second);
 
     expect((await runExecution({ remoteFilePaths: [remotePath] })).status).toBe('SUCCEEDED');
-    const target = await until('new version', async () => {
-      const head = await targetMd5();
-      return head?.md5 === md5(second) ? head : undefined;
-    });
-    expect(target.versionId).not.toBe(firstVersion);
+    const copy = await until('second copy', async () => (await copies()).find((c) => c.md5 === md5(second)));
+    expect(copy.key).not.toBe(firstCopy?.key);
+    expect((await copies()).find((c) => c.key === firstCopy?.key)).toEqual(firstCopy);
   });
 
   test('a missing remote file ends in FileNotAvailable, not a failure', async () => {

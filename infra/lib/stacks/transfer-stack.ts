@@ -7,7 +7,8 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as transfer from 'aws-cdk-lib/aws-transfer';
 import { acknowledge } from '../nag';
 import { Construct } from 'constructs';
-import { A2X_FEED, EnvironmentConfig, VendorConfig } from '../../config';
+import { TransferConnectorReference } from '../constructs/retrieve-file-state-machine';
+import { A2X_FEED, EnvironmentConfig, VendorConfig, VendorEndpointConfig } from '../../config';
 
 export interface TransferStackProps extends StackProps {
   readonly config: EnvironmentConfig;
@@ -18,53 +19,79 @@ export interface TransferStackProps extends StackProps {
 interface ConnectorOptions {
   readonly id: string;
   readonly slug: string;
-  readonly vendor: VendorConfig;
+  readonly vendor: VendorEndpointConfig;
   /** Object-key pattern the connector may write to. */
   readonly writePattern: string;
 }
 
 /** Vendor secrets and Transfer Family SFTP connectors. See docs/architecture/component-specs.md §2–3. */
 export class TransferStack extends Stack {
-  public readonly jseConnector: transfer.CfnConnector;
-  public readonly a2xConnector: transfer.CfnConnector;
+  public readonly jseConnector: TransferConnectorReference;
+  public readonly a2xConnector: TransferConnectorReference;
 
   private readonly config: EnvironmentConfig;
   private readonly bucket: s3.IBucket;
   private readonly dataKey: kms.IKey;
-  private readonly loggingRole: iam.Role;
+  private readonly loggingRole: iam.Role | undefined;
 
   constructor(scope: Construct, id: string, props: TransferStackProps) {
     super(scope, id, props);
     this.config = props.config;
     this.bucket = props.bucket;
     this.dataKey = props.dataKey;
+    this.loggingRole = [this.config.jse, this.config.a2x].some((vendor) => 'sftpUrl' in vendor)
+      ? this.createLoggingRole()
+      : undefined;
 
-    this.loggingRole = new iam.Role(this, 'ConnectorLoggingRole', {
-      assumedBy: this.transferPrincipal(),
-      description: 'Lets Transfer Family connectors write CloudWatch Logs',
-    });
-    this.loggingRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:DescribeLogStreams', 'logs:PutLogEvents'],
-        resources: [`arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/aws/transfer/*`],
-      }),
-    );
-    acknowledge(this.loggingRole, [
-      { id: 'AwsSolutions-IAM5', reason: 'Connector log group names contain the generated connector id.' },
-    ]);
-
-    this.jseConnector = this.createConnector({
+    this.jseConnector = this.resolveConnector({
       id: 'JseIdp',
       slug: 'jse-idp',
       vendor: this.config.jse,
       writePattern: 'jse/idp/*/temp/*',
     });
-    this.a2xConnector = this.createConnector({
+    this.a2xConnector = this.resolveConnector({
       id: 'A2x',
       slug: 'a2x',
       vendor: this.config.a2x,
       writePattern: `${A2X_FEED.prefix}*`,
     });
+  }
+
+  private createLoggingRole(): iam.Role {
+    const loggingRole = new iam.Role(this, 'ConnectorLoggingRole', {
+      assumedBy: this.transferPrincipal(),
+      description: 'Lets Transfer Family connectors write CloudWatch Logs',
+    });
+    loggingRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:DescribeLogStreams', 'logs:PutLogEvents'],
+        resources: [`arn:${this.partition}:logs:${this.region}:${this.account}:log-group:/aws/transfer/*`],
+      }),
+    );
+    acknowledge(loggingRole, [
+      { id: 'AwsSolutions-IAM5', reason: 'Connector log group names contain the generated connector id.' },
+    ]);
+    return loggingRole;
+  }
+
+  private resolveConnector(
+    opts: Omit<ConnectorOptions, 'vendor'> & { readonly vendor: VendorConfig },
+  ): TransferConnectorReference {
+    if ('connectorId' in opts.vendor) {
+      return {
+        connectorId: opts.vendor.connectorId,
+        connectorArn: this.formatArn({
+          service: 'transfer',
+          resource: 'connector',
+          resourceName: opts.vendor.connectorId,
+        }),
+      };
+    }
+
+    if (!this.loggingRole) {
+      throw new Error('A Transfer Family logging role is required when creating connectors.');
+    }
+    return this.createConnector({ ...opts, vendor: opts.vendor }, this.loggingRole);
   }
 
   private transferPrincipal(): iam.IPrincipal {
@@ -76,7 +103,7 @@ export class TransferStack extends Stack {
     });
   }
 
-  private createConnector(opts: ConnectorOptions): transfer.CfnConnector {
+  private createConnector(opts: ConnectorOptions, loggingRole: iam.Role): TransferConnectorReference {
     const secret = new secretsmanager.Secret(this, `${opts.id}SftpSecret`, {
       secretName: `prime/${this.config.envName}/sftp/${opts.slug}`,
       description: `${opts.id} SFTP connector credentials as JSON with Username and PrivateKey or Password. Value is set out-of-band.`,
@@ -125,7 +152,7 @@ export class TransferStack extends Stack {
     const connector = new transfer.CfnConnector(this, `${opts.id}SftpConnector`, {
       url: opts.vendor.sftpUrl,
       accessRole: accessRole.roleArn,
-      loggingRole: this.loggingRole.roleArn,
+      loggingRole: loggingRole.roleArn,
       sftpConfig: {
         userSecretId: secret.secretArn,
         trustedHostKeys: opts.vendor.trustedHostKeys,
@@ -143,6 +170,6 @@ export class TransferStack extends Stack {
       description: 'Send to the vendor for allowlisting',
       value: Fn.join(',', connector.attrServiceManagedEgressIpAddresses),
     });
-    return connector;
+    return { connectorId: connector.attrConnectorId, connectorArn: connector.attrArn };
   }
 }

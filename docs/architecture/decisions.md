@@ -75,6 +75,18 @@ These are lightweight architecture decision records (ADRs). Add a new ADR for an
 - **Decision:** `AwsSolutionsPlugin` (`infra/lib/nag.ts`) wraps `AwsSolutionsChecks`. Acknowledging the base rule on a construct covers all of that rule's findings on the construct and its children, the same as cdk-nag v2 without `appliesTo`. Each acknowledgement is scoped to the narrowest construct and carries a written reason.
 - **Consequences:** `test/nag.test.ts` fails the build if dev, uat or prod has any unacknowledged violation, and CI also checks `cdk.out/validation-report.json`.
 
+## ADR-010: Shadow-Rename stores date-stamped copies and never overwrites
+
+- **Status:** Accepted. Answers open question Q6.
+- **Context:** The first design overwrote the file in the parent folder in place, and S3 versioning kept the history.
+- **Decision:** Shadow-Rename never overwrites a file. If a file in the parent folder already has the new file's md5 (its `md5` metadata), the temp file is deleted. Otherwise the temp file is copied to the parent folder as `<name>_<YYYYMMDDTHHMMSS><extension>`, stamped with the time it was retrieved in SAST (for example `BDA_FILE_20261001T033012.csv`), and then deleted from `temp/`. If a file with that name already exists, the Lambda raises an error instead of copying.
+- **Consequences:**
+  - Every content change adds a file, and existing files never change. History no longer depends on S3 versioning.
+  - Consumers read the newest stamped file in a folder instead of a fixed file name.
+  - Content that changes back to an earlier version is discarded as a duplicate, because its md5 is already in the folder.
+  - The duplicate check reads the `md5` metadata of the files in the parent folder, newest first. A repeated download matches on the first read; a new file reads every stored copy.
+  - The 07:00 deadline check looks for a copy stamped with today's date, not a fixed file modified today.
+
 ---
 
 ## Open questions
@@ -85,9 +97,6 @@ These are lightweight architecture decision records (ADRs). Add a new ADR for an
 | Q2 | Exact remote paths and file-name patterns for each feed, including the A2X date format in the name | Placeholders in config | Phase 3, Phase 5 |
 | Q3 | Schedules for market-data, reference-data, options-data and A2X | Same window as bda | Phase 3, Phase 5 |
 | Q4 | Weekdays only, or also weekends and JSE public holidays? | `MON-FRI`; holidays not handled (runs end in `FileNotAvailable`) | Phase 3 |
-| Q5 | The A2X schedule is named `gm-prime-equities-sftp-bda` in the diagram, the same as the JSE one. Is that intended? | Rename to `gm-prime-equities-sftp-a2x` | Phase 5 |
-| Q6 | Shadow-Rename: overwrite the parent file in place, or keep a date-stamped name for each version? | Overwrite in place; S3 versioning keeps the history | Phase 4 |
-| Q7 | Should A2X files also land in `temp/` and go through Shadow-Rename? | No, as in the diagram | Phase 5 |
+| Q5 | The A2X schedule is named `gm-prime-equities-sftp-a2x` in the diagram, the same as the JSE one. Is that intended? | Rename to `gm-prime-equities-sftp-a2x` | Phase 5 |
 | Q8 | Secret names in the original diagram (unreadable) | `prime/{env}/sftp/a2x`, `prime/{env}/sftp/jse-idp` | Phase 2 |
 | Q9 | Deadline for each feed after which a missing file is an incident | 07:00 SAST | Phase 6 |
-| Q10 | Who receives alarms (email list, Slack, PagerDuty)? | SNS → team email list | Phase 6 |

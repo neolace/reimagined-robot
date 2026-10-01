@@ -28,7 +28,7 @@ export const buildStage = (config: EnvironmentConfig = devConfig): BuiltStage =>
     stage,
     templates: {
       storage: Template.fromStack(stage.storage),
-      transfer: Template.fromStack(stage.transfer),
+      transfer: stage.transfer ? Template.fromStack(stage.transfer) : Template.fromJSON({ Resources: {} }),
       orchestration: Template.fromStack(stage.orchestration),
       processing: Template.fromStack(stage.processing),
       monitoring: Template.fromStack(stage.monitoring),

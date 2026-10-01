@@ -8,7 +8,7 @@ export const prodConfig: EnvironmentConfig = {
   account: process.env.PRIME_PROD_ACCOUNT ?? '333333333333', // REPLACE_ME
   region: 'af-south-1',
   logRetention: RetentionDays.THREE_MONTHS,
-  alarmEmails: ['prime-ingestion-alerts@example.com'], // REPLACE_ME
+  alarmEmails: ['tertius.geldenhuys@standardbank.co.za'],
   fileDeadline: { hour: 7, minute: 0 },
   jse: {
     sftpUrl: 'sftp://jse-idp-prod.example.invalid:22', // REPLACE_ME

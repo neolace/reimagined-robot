@@ -17,3 +17,4 @@ __pycache__/
 # Local secrets – never commit
 *.secret.json
 new-secret.json
+.claude/

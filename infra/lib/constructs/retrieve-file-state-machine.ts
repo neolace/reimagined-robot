@@ -2,13 +2,17 @@ import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import * as transfer from 'aws-cdk-lib/aws-transfer';
 import { acknowledge } from '../nag';
 import { Construct } from 'constructs';
 
+export interface TransferConnectorReference {
+  readonly connectorId: string;
+  readonly connectorArn: string;
+}
+
 export interface RetrieveFileStateMachineProps {
   readonly stateMachineName: string;
-  readonly connector: transfer.CfnConnector;
+  readonly connector: TransferConnectorReference;
   /** "/<bucket>/<prefix>" with no trailing slash. */
   readonly localDirectoryPath: string;
   /** Transfer Family FailureCode that means the remote file does not exist yet. */
@@ -33,7 +37,7 @@ export class RetrieveFileStateMachine extends Construct {
 
   constructor(scope: Construct, id: string, props: RetrieveFileStateMachineProps) {
     super(scope, id);
-    const connectorArn = props.connector.attrArn;
+    const { connectorArn, connectorId } = props.connector;
     const sdkRetry: sfn.RetryProps = {
       errors: ['Transfer.ThrottlingException', 'Transfer.ServiceUnavailableException', 'Transfer.InternalServiceError'],
       interval: Duration.seconds(2),
@@ -47,7 +51,7 @@ export class RetrieveFileStateMachine extends Construct {
       action: 'startFileTransfer',
       iamAction: 'transfer:StartFileTransfer',
       parameters: {
-        ConnectorId: props.connector.attrConnectorId,
+        ConnectorId: connectorId,
         RetrieveFilePaths: sfn.JsonPath.listAt('$.remoteFilePaths'),
         LocalDirectoryPath: props.localDirectoryPath,
       },
@@ -65,7 +69,7 @@ export class RetrieveFileStateMachine extends Construct {
       action: 'listFileTransferResults',
       iamAction: 'transfer:ListFileTransferResults',
       parameters: {
-        ConnectorId: props.connector.attrConnectorId,
+        ConnectorId: connectorId,
         TransferId: sfn.JsonPath.stringAt('$.transfer.TransferId'),
       },
       iamResources: [connectorArn],

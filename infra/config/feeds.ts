@@ -53,6 +53,9 @@ export const JSE_TEMP_KEY_WILDCARD = 'jse/idp/*/temp/*';
 
 export const bucketNameFor = (envName: string): string => `prime-${envName}-file-downloads`;
 
-/** Final S3 key of a retrieved file: the connector keeps the remote file name. */
+/**
+ * S3 key of a retrieved file in its final folder: the connector keeps the remote file name. For JSE feeds this is the
+ * name before Shadow-Rename adds its date-time stamp (`<name>_<YYYYMMDDTHHMMSS><extension>`).
+ */
 export const finalKeyFor = (prefix: string, remotePath: string): string =>
   `${prefix}${remotePath.substring(remotePath.lastIndexOf('/') + 1)}`;

@@ -6,19 +6,18 @@ import * as scheduler from 'aws-cdk-lib/aws-scheduler';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import * as transfer from 'aws-cdk-lib/aws-transfer';
 import { acknowledge } from '../nag';
 import { Construct } from 'constructs';
 import { A2X_FEED, EnvironmentConfig, JSE_FEEDS, SCHEDULE_GROUPS } from '../../config';
 import { createDeadLetterQueue, FeedSchedule } from '../constructs/feed-schedule';
-import { RetrieveFileStateMachine } from '../constructs/retrieve-file-state-machine';
+import { RetrieveFileStateMachine, TransferConnectorReference } from '../constructs/retrieve-file-state-machine';
 import { TypeScriptFunction } from '../constructs/typescript-function';
 
 export interface OrchestrationStackProps extends StackProps {
   readonly config: EnvironmentConfig;
   readonly bucket: s3.IBucket;
-  readonly jseConnector: transfer.CfnConnector;
-  readonly a2xConnector: transfer.CfnConnector;
+  readonly jseConnector: TransferConnectorReference;
+  readonly a2xConnector: TransferConnectorReference;
 }
 
 /**

@@ -87,7 +87,7 @@ export class MonitoringStack extends Stack {
     const deadlineFeeds: DeadlineFeed[] = [
       ...JSE_FEEDS.filter((f) => config.jse.feeds[f.id].enabled).map((f) => ({
         feed: f.id,
-        kind: 'fixed' as const,
+        kind: 'stamped' as const,
         key: finalKeyFor(f.prefix, config.jse.feeds[f.id].remotePath),
       })),
       ...(config.a2x.enabled
