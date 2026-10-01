@@ -6,7 +6,7 @@ describe('ProcessingStack', () => {
 
   test('Shadow-Rename is Python on arm64 with reserved concurrency 1', () => {
     processing.hasResourceProperties('AWS::Lambda::Function', {
-      FunctionName: 'Shadow-Rename',
+      FunctionName: 'gm-prime-equities-shadow-rename',
       Runtime: 'python3.14',
       Handler: 'app.lambda_handler',
       Architectures: ['arm64'],

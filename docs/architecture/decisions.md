@@ -95,8 +95,6 @@ These are lightweight architecture decision records (ADRs). Add a new ADR for an
 | --- | --- | --- | --- |
 | Q1 | Which AWS region? Are Transfer Family SFTP connectors and EventBridge Scheduler supported there? | `af-south-1`; fall back to `eu-west-1` if a service is missing | Phase 1 |
 | Q2 | Exact remote paths and file-name patterns for each feed, including the A2X date format in the name | Placeholders in config | Phase 3, Phase 5 |
-| Q3 | Schedules for market-data, reference-data, options-data and A2X | Same window as bda | Phase 3, Phase 5 |
 | Q4 | Weekdays only, or also weekends and JSE public holidays? | `MON-FRI`; holidays not handled (runs end in `FileNotAvailable`) | Phase 3 |
-| Q5 | The A2X schedule is named `gm-prime-equities-sftp-a2x` in the diagram, the same as the JSE one. Is that intended? | Rename to `gm-prime-equities-sftp-a2x` | Phase 5 |
 | Q8 | Secret names in the original diagram (unreadable) | `prime/{env}/sftp/a2x`, `prime/{env}/sftp/jse-idp` | Phase 2 |
 | Q9 | Deadline for each feed after which a missing file is an incident | 07:00 SAST | Phase 6 |

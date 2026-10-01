@@ -18,7 +18,7 @@ The design follows the [AWS Well-Architected Framework](https://docs.aws.amazon.
 
 ## Conventions
 
-- **Names:** resources keep the names in the diagram and add an environment suffix where they have to be unique per account or globally, for example `prime-{env}-file-downloads`.
+- **Names:** resources keep the names in the diagram and add an environment suffix where they have to be unique globally, for example `gm-prime-equities-file-downloads-{env}`. Each environment has its own account, so per-account names such as state machines and schedules have no suffix.
 - **Region:** `af-south-1` (Cape Town) is assumed because the data sources are South African. This is listed as an open question in [decisions](architecture/decisions.md#open-questions).
 - **Timezone:** all schedules and business dates use `Africa/Johannesburg` (SAST, UTC+2, no DST).
 - **Languages:** TypeScript for the CDK app, the date Lambda, tests and tooling. Python only for `src/lambdas/shadow_rename/`.

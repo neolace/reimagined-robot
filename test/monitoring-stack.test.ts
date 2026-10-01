@@ -19,12 +19,12 @@ describe('MonitoringStack', () => {
 
   test('every state machine has failed and timed-out alarms', () => {
     for (const name of [
-      'gm-prime-equities-bda',
+      'gm-prime-equities-bda-daily',
       'gm-prime-equities-market-data',
       'gm-prime-equities-reference-data',
       'gm-prime-equities-options-data',
       'gm-prime-equities-a2x-transfer',
-      'gm-prime-equities-a2x',
+      'gm-prime-equities-step-function-a2x-sftp',
     ]) {
       expect(alarmNames).toContain(`prime-prod-${name}-failed`);
       expect(alarmNames).toContain(`prime-prod-${name}-timed-out`);

@@ -4,7 +4,7 @@ import { Template } from 'aws-cdk-lib/assertions';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import { devConfig, uatConfig } from '../infra/config';
+import { bucketNameFor, devConfig, uatConfig } from '../infra/config';
 import { RetrieveFileStateMachine } from '../infra/lib/constructs/retrieve-file-state-machine';
 import { TransferStack } from '../infra/lib/stacks/transfer-stack';
 import { json, resourcesOf } from './helpers';
@@ -14,7 +14,7 @@ const buildTransfer = (config: typeof devConfig | typeof uatConfig) => {
   const env = { account: config.account, region: config.region };
   const imports = new Stack(app, `${config.envName}-Imports`, { env });
   new logs.LogGroup(imports, 'FixtureLogGroup');
-  const bucket = s3.Bucket.fromBucketName(imports, 'Bucket', `prime-${config.envName}-file-downloads`);
+  const bucket = s3.Bucket.fromBucketName(imports, 'Bucket', bucketNameFor(config.envName));
   const dataKey = kms.Key.fromKeyArn(
     imports,
     'DataKey',
@@ -25,14 +25,14 @@ const buildTransfer = (config: typeof devConfig | typeof uatConfig) => {
   new RetrieveFileStateMachine(transfer, 'RetrieveJse', {
     stateMachineName: `${config.envName}-jse-retrieve`,
     connector: transfer.jseConnector,
-    localDirectoryPath: `/prime-${config.envName}-file-downloads/jse/idp/bda/temp`,
+    localDirectoryPath: `/${bucketNameFor(config.envName)}/jse/idp/bda/temp`,
     fileNotFoundFailureCode: config.jse.fileNotFoundFailureCode,
     logRetention: logs.RetentionDays.ONE_MONTH,
   });
   new RetrieveFileStateMachine(transfer, 'RetrieveA2x', {
     stateMachineName: `${config.envName}-a2x-retrieve`,
     connector: transfer.a2xConnector,
-    localDirectoryPath: `/prime-${config.envName}-file-downloads/a2x/ftp/reference-data/equities`,
+    localDirectoryPath: `/${bucketNameFor(config.envName)}/a2x/ftp/reference-data/equities`,
     fileNotFoundFailureCode: config.a2x.fileNotFoundFailureCode,
     logRetention: logs.RetentionDays.ONE_MONTH,
   });

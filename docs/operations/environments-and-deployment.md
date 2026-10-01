@@ -32,7 +32,8 @@ npx cdk bootstrap aws://<ACCOUNT_ID>/<REGION> \
 
 | Item | dev | uat | prod |
 | --- | --- | --- | --- |
-| Bucket name | `prime-dev-file-downloads` | `prime-uat-file-downloads` | `prime-prod-file-downloads` |
+| Bucket name | `gm-prime-equities-file-downloads-dev` | `gm-prime-equities-file-downloads-uat` | `gm-prime-equities-file-downloads-prod` |
+| Transfer connectors | Existing: `c-sadfsdfsdfsddfsd` (A2X), `c-dsfgdsfgsdfdgsdf` (JSE IDP) | Created by CDK | Created by CDK |
 | Log retention | 30 days | 30 days | 90 days |
 | Schedules enabled | Optional (off by default to save vendor calls) | On | On |
 | Alarm notifications | Email to `tertius.geldenhuys@standardbank.co.za` | Email to `tertius.geldenhuys@standardbank.co.za` | Email to `tertius.geldenhuys@standardbank.co.za` |
@@ -129,7 +130,7 @@ flowchart LR
 ## Smoke test after a deploy
 
 1. Run `aws transfer test-connection --connector-id <id>` for each connector. Expect `"Status": "OK"`.
-2. Start `gm-prime-equities-bda` by hand with its scheduled input. Expect `Succeeded` or `FileNotAvailable`.
+2. Start `gm-prime-equities-bda-daily` by hand with its scheduled input. Expect `Succeeded` or `FileNotAvailable`.
 3. Check that the CloudWatch dashboard shows the execution and that no alarm is in `ALARM`.
 
 ## Rollback

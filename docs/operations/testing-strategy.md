@@ -143,7 +143,7 @@ describe('StorageStack', () => {
 
   test('bucket is KMS-encrypted, versioned and private', () => {
     storage.hasResourceProperties('AWS::S3::Bucket', {
-      BucketName: 'prime-dev-file-downloads',
+      BucketName: 'gm-prime-equities-file-downloads-dev',
       VersioningConfiguration: { Status: 'Enabled' },
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [
@@ -188,7 +188,7 @@ CDK turns on EventBridge notifications through a `Custom::S3BucketNotifications`
 | --- | --- | --- |
 | `storage-stack.test.ts` | dev | SSE-KMS with a Bucket Key, versioning, Block Public Access; EventBridge notifications; bucket and key retained (`DeletionPolicy: Retain`); key rotation; TLS-only bucket policy; lifecycle rules: each JSE `temp/` prefix expires after 7 days, noncurrent versions after 90 days, incomplete multipart uploads after 1 day |
 | `transfer-stack.test.ts` | dev | Two connectors with pinned `TrustedHostKeys`, a `UserSecretId` and a logging role; two secrets (`prime/dev/sftp/jse-idp`, `prime/dev/sftp/a2x`) that are CMK-encrypted, retained and have no value in the template; all three roles trust only `transfer.amazonaws.com`, conditioned on `aws:SourceAccount`; each connector can write only to its own landing prefix; egress IP outputs for allowlisting |
-| `orchestration-stack.test.ts` | uat, and dev for one test | Six state machines with the diagram names, X-Ray on, `ERROR` logging without execution data; the retrieve definition (`startFileTransfer`, `listFileTransferResults`, `FileNotAvailable`, `TransferFailed`, throttling retries with full jitter, 900 s timeout); the A2X outer machine (`DetermineDate`, `startExecution.sync`, `States.Format` on the remote path template); two schedule groups; the bda schedule (`cron(0/30 3-6 ? * MON-FRI *)` in `Africa/Johannesburg`, flexible window `OFF`, input, DLQ, retry policy); a schedule for every feed; every schedule `DISABLED` in dev; the date Lambda on Node.js 24, arm64, with active tracing |
+| `orchestration-stack.test.ts` | uat, and dev for one test | Six state machines with the diagram names, X-Ray on, `ERROR` logging without execution data; the retrieve definition (`startFileTransfer`, `listFileTransferResults`, `FileNotAvailable`, `TransferFailed`, throttling retries with full jitter, 900 s timeout); the A2X outer machine (`DetermineDate`, `startExecution.sync`, `States.Format` on the remote path template); two schedule groups; the bda schedule (`cron(0/30 3-6 ? * MON-FRI *)` in `Africa/Johannesburg`, flexible window `OFF`, input, DLQ, retry policy); every schedule in its diagram group with the 03:00–06:30 window, targeting the state machine the diagram puts inside it; dev's JSE machines use the JSE connector and the A2X machine the A2X connector; every schedule `DISABLED` in dev; the date Lambda on Node.js 24, arm64, with active tracing |
 | `processing-stack.test.ts` | dev | Shadow-Rename on Python 3.14, arm64, handler `app.lambda_handler`, reserved concurrency 1, active tracing; the rule matches `Object Created` with key wildcard `jse/idp/*/temp/*`; the target has a DLQ, 4 retries and a 2-hour maximum event age; `s3:DeleteObject` only on `jse/idp/*/temp/*` |
 | `monitoring-stack.test.ts` | prod | KMS-encrypted alert topic with an email subscription; `failed` and `timed-out` alarms for all six state machines; error alarms for all three Lambdas; depth alarms for all four DLQs; every alarm has `TreatMissingData: notBreaching` and an alarm action; the deadline check schedule (`cron(0 7 ? * MON-FRI *)` in `Africa/Johannesburg`, `ENABLED`) and its function's `BUCKET_NAME` and `FEEDS`; an EventBridge rule for `SFTP Connector File Retrieve Failed`; the dashboard |
 | `nag.test.ts` | dev, uat, prod | No unacknowledged cdk-nag violations ([cdk-nag](#cdk-nag)) |
@@ -316,7 +316,7 @@ flowchart LR
 
 ```python
 # src/lambdas/shadow_rename/tests/conftest.py (abridged)
-BUCKET = "prime-test-file-downloads"
+BUCKET = "gm-prime-equities-file-downloads-test"
 REGION = "af-south-1"
 
 
@@ -440,7 +440,7 @@ sequenceDiagram
 
 | # | Test | Steps | Expect |
 | --- | --- | --- | --- |
-| 1 | `a new file is stored as a date-stamped copy with md5 metadata` | Upload a unique fixture; start `gm-prime-equities-bda` | `SUCCEEDED`; a copy named `BDA_FILE_<YYYYMMDDTHHMMSS>.csv` carries the fixture's `md5`; `temp/` is empty |
+| 1 | `a new file is stored as a date-stamped copy with md5 metadata` | Upload a unique fixture; start `gm-prime-equities-bda-daily` | `SUCCEEDED`; a copy named `BDA_FILE_<YYYYMMDDTHHMMSS>.csv` carries the fixture's `md5`; `temp/` is empty |
 | 2 | `retrieving the same content again is discarded as a duplicate` | Start the machine again without changing the file | `SUCCEEDED`; `temp/` empties; no copy is added |
 | 3 | `changed content is stored as a new copy and the first copy is kept` | Upload changed content; start the machine | `SUCCEEDED`; a second copy with the new `md5`; the first copy keeps its key, `md5` and VersionId |
 | 4 | `a missing remote file ends in FileNotAvailable, not a failure` | Start the machine with `/does-not-exist/<uuid>.csv` | `SUCCEEDED` |

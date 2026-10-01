@@ -20,7 +20,7 @@ export class StorageStack extends Stack {
     const { config } = props;
 
     this.dataKey = new kms.Key(this, 'DataKey', {
-      alias: `alias/prime-${config.envName}-file-downloads`,
+      alias: `alias/${bucketNameFor(config.envName)}`,
       description: 'Encrypts the landing bucket, SFTP secrets and alert topic',
       enableKeyRotation: true,
       removalPolicy: RemovalPolicy.RETAIN,

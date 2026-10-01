@@ -1,5 +1,5 @@
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { BDA_WINDOW, FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER, jseFeeds } from './defaults';
+import { FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER, jseFeeds, SFTP_WINDOW } from './defaults';
 import type { EnvironmentConfig } from './types';
 
 // Values marked REPLACE_ME must be filled in before the first deploy to this environment.
@@ -11,15 +11,15 @@ export const devConfig: EnvironmentConfig = {
   alarmEmails: ['tertius.geldenhuys@standardbank.co.za'],
   fileDeadline: { hour: 7, minute: 0 },
   jse: {
-    connectorId: 'c-sadfsdfsdfsddfsd',
+    connectorId: 'c-dsfgdsfgsdfdgsdf',
     fileNotFoundFailureCode: FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER,
     feeds: jseFeeds(false),
   },
   a2x: {
     enabled: false,
-    connectorId: 'c-dsfgdsfgsdfdgsdf',
+    connectorId: 'c-sadfsdfsdfsddfsd',
     fileNotFoundFailureCode: FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER,
     remotePathTemplate: '/outbound/equities/EQ_REF_{}.csv', // REPLACE_ME (Q2)
-    schedule: BDA_WINDOW, // TODO(Q3)
+    schedule: SFTP_WINDOW,
   },
 };

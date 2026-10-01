@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | State machines | `/aws/vendedlogs/states/<name>` | 30 · 90 days | Level `ERROR`, execution data excluded (paths only, no content) |
 | Date Lambda | `/aws/lambda/gm-prime-equities-date` | 30 · 90 days | Powertools Logger (TS), JSON |
-| Shadow-Rename | `/aws/lambda/Shadow-Rename` | 30 · 90 days | Powertools Logger (Python), JSON; keys `temp_key`, `target_key`, `duplicate_of`, `md5`, `action` |
+| Shadow-Rename | `/aws/lambda/gm-prime-equities-shadow-rename` | 30 · 90 days | Powertools Logger (Python), JSON; keys `temp_key`, `target_key`, `duplicate_of`, `md5`, `action` |
 | Transfer connectors | `/aws/transfer/<connector-id>` | 30 · 90 days | Connection and transfer events |
 | API activity | Organisation CloudTrail | Org policy | |
 
@@ -36,10 +36,10 @@ All alarms go to one SNS topic per environment, `prime-{env}-ingestion-alerts`, 
 
 ### "File not received by deadline" check
 
-CloudWatch alarms can't express "by 07:00 on a weekday", so a small **TypeScript** Lambda, `gm-prime-file-deadline-check`, runs on an EventBridge Scheduler cron at `cfg.fileDeadline` (default `cron(0 7 ? * MON-FRI *)`, `Africa/Johannesburg`). For each feed it calls `HeadObject` on the expected final key:
+CloudWatch alarms can't express "by 07:00 on a weekday", so a small **TypeScript** Lambda, `gm-prime-file-deadline-check`, runs on an EventBridge Scheduler cron at `cfg.fileDeadline` (default `cron(0 7 ? * MON-FRI *)`, `Africa/Johannesburg`). For each feed it checks the expected final key:
 
-- JSE feeds: a copy stamped with today's SAST date must exist, for example a key starting `jse/idp/bda/BDA_FILE_20261001T` ([ADR-010](../architecture/decisions.md#adr-010-shadow-rename-stores-date-stamped-copies-and-never-overwrites)).
-- A2X: the date-stamped key for today's `businessDate`.
+- JSE feeds: a copy stamped with today's SAST date must exist. It lists keys starting, for example, `jse/idp/bda/BDA_FILE_20261001T` ([ADR-010](../architecture/decisions.md#adr-010-shadow-rename-stores-date-stamped-copies-and-never-overwrites)).
+- A2X: `HeadObject` on the date-stamped key for today's `businessDate`.
 
 For each feed that's missing, it publishes to the alerts SNS topic and emits a `FileMissing` custom metric (dimension `Feed`).
 
@@ -102,7 +102,7 @@ aws transfer test-connection --connector-id <connector-id>
   3. Reprocess by invoking the Lambda with the event from the message (it's idempotent):
 
      ```bash
-     aws lambda invoke --function-name Shadow-Rename \
+     aws lambda invoke --function-name gm-prime-equities-shadow-rename \
        --cli-binary-format raw-in-base64-out --payload file://event.json out.json
      ```
 
@@ -113,8 +113,8 @@ aws transfer test-connection --connector-id <connector-id>
 Shadow-Rename never overwrites, so the wrong file is its own date-stamped copy and the earlier copies are untouched. Wait until the vendor has fixed the file, or [pause ingestion](#pause-ingestion) first; otherwise the next pull stores the wrong file again. Then delete the wrong copy:
 
 ```bash
-aws s3api list-objects-v2 --bucket prime-<env>-file-downloads --prefix jse/idp/bda/ --delimiter /
-aws s3api delete-object --bucket prime-<env>-file-downloads --key jse/idp/bda/<name>_<YYYYMMDDTHHMMSS>.csv
+aws s3api list-objects-v2 --bucket gm-prime-equities-file-downloads-<env> --prefix jse/idp/bda/ --delimiter /
+aws s3api delete-object --bucket gm-prime-equities-file-downloads-<env> --key jse/idp/bda/<name>_<YYYYMMDDTHHMMSS>.csv
 ```
 
 S3 versioning keeps the deleted copy as a noncurrent version for 90 days. Tell the downstream consumers about the correction.
@@ -125,7 +125,7 @@ S3 versioning keeps the deleted copy as a noncurrent version for 90 days. Tell t
 
   ```bash
   aws stepfunctions start-execution \
-    --state-machine-arn arn:aws:states:<region>:<account>:stateMachine:gm-prime-equities-bda \
+    --state-machine-arn arn:aws:states:<region>:<account>:stateMachine:gm-prime-equities-bda-daily \
     --input '{"remoteFilePaths":["/outbound/bda/BDA_FILE.csv"]}'
   ```
 
@@ -133,7 +133,7 @@ S3 versioning keeps the deleted copy as a noncurrent version for 90 days. Tell t
 
   ```bash
   aws stepfunctions start-execution \
-    --state-machine-arn arn:aws:states:<region>:<account>:stateMachine:gm-prime-equities-a2x \
+    --state-machine-arn arn:aws:states:<region>:<account>:stateMachine:gm-prime-equities-step-function-a2x-sftp \
     --input '{"businessDate":"20261001"}'
   ```
 

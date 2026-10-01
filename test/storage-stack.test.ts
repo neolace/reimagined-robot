@@ -7,7 +7,7 @@ describe('StorageStack', () => {
 
   test('bucket is KMS-encrypted, versioned and private', () => {
     storage.hasResourceProperties('AWS::S3::Bucket', {
-      BucketName: 'prime-dev-file-downloads',
+      BucketName: 'gm-prime-equities-file-downloads-dev',
       VersioningConfiguration: { Status: 'Enabled' },
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [

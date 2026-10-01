@@ -1,5 +1,5 @@
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { BDA_WINDOW, FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER, jseFeeds } from './defaults';
+import { FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER, jseFeeds, SFTP_WINDOW } from './defaults';
 import type { EnvironmentConfig } from './types';
 
 // Values marked REPLACE_ME must be filled in before the first deploy to this environment.
@@ -22,6 +22,6 @@ export const prodConfig: EnvironmentConfig = {
     trustedHostKeys: ['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIREPLACEMEWITHA2XHOSTKEY000000000000000000000'], // REPLACE_ME
     fileNotFoundFailureCode: FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER,
     remotePathTemplate: '/outbound/equities/EQ_REF_{}.csv', // REPLACE_ME (Q2)
-    schedule: BDA_WINDOW, // TODO(Q3)
+    schedule: SFTP_WINDOW,
   },
 };

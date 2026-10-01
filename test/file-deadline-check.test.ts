@@ -21,7 +21,7 @@ let cachedModule: DeadlineModule | undefined;
 const loadModule = async (): Promise<DeadlineModule> => {
   if (cachedModule) return cachedModule;
   process.env.AWS_REGION = 'af-south-1';
-  process.env.BUCKET_NAME = 'prime-test-file-downloads';
+  process.env.BUCKET_NAME = 'gm-prime-equities-file-downloads-test';
   process.env.ALERT_TOPIC_ARN = 'arn:aws:sns:af-south-1:111111111111:alerts';
   process.env.FEEDS = JSON.stringify(FEEDS);
   process.env.POWERTOOLS_METRICS_NAMESPACE = 'Test';

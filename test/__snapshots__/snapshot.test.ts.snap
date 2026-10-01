@@ -147,14 +147,14 @@ exports[`template snapshots (prod) monitoring 1`] = `
               "{"start":"-P1D","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# Prime SFTP ingestion (prod)\\nJSE feeds poll 03:00–06:30 SAST on weekdays. Missing files are checked at 07:00. Runbook: \`docs/operations/observability-and-runbook.md\`"}},{"type":"alarm","width":24,"height":6,"x":0,"y":2,"properties":{"title":"Alarms","alarms":["",
               {
                 "Fn::GetAtt": [
-                  "gmprimeequitiesbdafailedD63E92D9",
+                  "gmprimeequitiesbdadailyfailed999559BF",
                   "Arn",
                 ],
               },
               "","",
               {
                 "Fn::GetAtt": [
-                  "gmprimeequitiesbdatimedoutC10107C2",
+                  "gmprimeequitiesbdadailytimedoutDD7D4A28",
                   "Arn",
                 ],
               },
@@ -217,14 +217,14 @@ exports[`template snapshots (prod) monitoring 1`] = `
               "","",
               {
                 "Fn::GetAtt": [
-                  "gmprimeequitiesa2xfailedAEDCF23F",
+                  "gmprimeequitiesstepfunctiona2xsftpfailedA54BF2C2",
                   "Arn",
                 ],
               },
               "","",
               {
                 "Fn::GetAtt": [
-                  "gmprimeequitiesa2xtimedout901D712C",
+                  "gmprimeequitiesstepfunctiona2xsftptimedout31FEE884",
                   "Arn",
                 ],
               },
@@ -285,7 +285,7 @@ exports[`template snapshots (prod) monitoring 1`] = `
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
               },
-              "",{"label":"gm-prime-equities-bda","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              "",{"label":"gm-prime-equities-bda-daily","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
               },
@@ -305,7 +305,7 @@ exports[`template snapshots (prod) monitoring 1`] = `
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
               },
-              "",{"label":"gm-prime-equities-a2x","period":3600,"stat":"Sum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":12,"y":8,"properties":{"view":"timeSeries","title":"Executions failed / timed out","region":"",
+              "",{"label":"gm-prime-equities-step-function-a2x-sftp","period":3600,"stat":"Sum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":12,"y":8,"properties":{"view":"timeSeries","title":"Executions failed / timed out","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -313,11 +313,11 @@ exports[`template snapshots (prod) monitoring 1`] = `
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
               },
-              "",{"label":"gm-prime-equities-bda failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              "",{"label":"gm-prime-equities-bda-daily failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
               },
-              "",{"label":"gm-prime-equities-bda timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
+              "",{"label":"gm-prime-equities-bda-daily timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
               },
@@ -353,11 +353,11 @@ exports[`template snapshots (prod) monitoring 1`] = `
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
               },
-              "",{"label":"gm-prime-equities-a2x failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              "",{"label":"gm-prime-equities-step-function-a2x-sftp failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
               {
                 "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
               },
-              "",{"label":"gm-prime-equities-a2x timed out","period":3600,"stat":"Sum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":0,"y":14,"properties":{"view":"timeSeries","title":"Lambda invocations / errors","region":"",
+              "",{"label":"gm-prime-equities-step-function-a2x-sftp timed out","period":3600,"stat":"Sum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":0,"y":14,"properties":{"view":"timeSeries","title":"Lambda invocations / errors","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -1010,74 +1010,6 @@ exports[`template snapshots (prod) monitoring 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "gmprimeequitiesa2xfailedAEDCF23F": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "AlertTopic2720D535",
-          },
-        ],
-        "AlarmDescription": "gm-prime-equities-a2x execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
-        "AlarmName": "prime-prod-gm-prime-equities-a2x-failed",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "ExecutionsFailed",
-        "Namespace": "AWS/States",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "Environment",
-            "Value": "prod",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "gmprimeequitiesa2xtimedout901D712C": {
-      "Properties": {
-        "AlarmActions": [
-          {
-            "Ref": "AlertTopic2720D535",
-          },
-        ],
-        "AlarmDescription": "gm-prime-equities-a2x timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
-        "AlarmName": "prime-prod-gm-prime-equities-a2x-timed-out",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
-            },
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "ExecutionsTimedOut",
-        "Namespace": "AWS/States",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "Environment",
-            "Value": "prod",
-          },
-        ],
-        "Threshold": 1,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "gmprimeequitiesa2xtransferfailed126FF52D": {
       "Properties": {
         "AlarmActions": [
@@ -1146,15 +1078,15 @@ exports[`template snapshots (prod) monitoring 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "gmprimeequitiesbdafailedD63E92D9": {
+    "gmprimeequitiesbdadailyfailed999559BF": {
       "Properties": {
         "AlarmActions": [
           {
             "Ref": "AlertTopic2720D535",
           },
         ],
-        "AlarmDescription": "gm-prime-equities-bda execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
-        "AlarmName": "prime-prod-gm-prime-equities-bda-failed",
+        "AlarmDescription": "gm-prime-equities-bda-daily execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-bda-daily-failed",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1180,15 +1112,15 @@ exports[`template snapshots (prod) monitoring 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "gmprimeequitiesbdatimedoutC10107C2": {
+    "gmprimeequitiesbdadailytimedoutDD7D4A28": {
       "Properties": {
         "AlarmActions": [
           {
             "Ref": "AlertTopic2720D535",
           },
         ],
-        "AlarmDescription": "gm-prime-equities-bda timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
-        "AlarmName": "prime-prod-gm-prime-equities-bda-timed-out",
+        "AlarmDescription": "gm-prime-equities-bda-daily timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-bda-daily-timed-out",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1418,6 +1350,74 @@ exports[`template snapshots (prod) monitoring 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
+    "gmprimeequitiesstepfunctiona2xsftpfailedA54BF2C2": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-step-function-a2x-sftp execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-step-function-a2x-sftp-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesstepfunctiona2xsftptimedout31FEE884": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-step-function-a2x-sftp timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-step-function-a2x-sftp-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
   },
   "Rules": {
     "CheckBootstrapVersion": {
@@ -1591,7 +1591,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
             "Arn",
           ],
         },
-        "StateMachineName": "gm-prime-equities-a2x",
+        "StateMachineName": "gm-prime-equities-step-function-a2x-sftp",
         "Tags": [
           {
             "Key": "Environment",
@@ -1608,7 +1608,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
     "A2xOuterLogs4456DBBB": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-a2x",
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-step-function-a2x-sftp",
         "RetentionInDays": 90,
         "Tags": [
           {
@@ -1773,7 +1773,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "gm-prime-scheduler-group-a2x-sftp-dlq",
+        "QueueName": "gm-prime-equities-scheduler-group-a2x-sftp-dlq",
         "SqsManagedSseEnabled": true,
         "Tags": [
           {
@@ -1821,7 +1821,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
     "A2xScheduleGroup711F0BC0": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "Name": "gm-prime-scheduler-group-a2x-sftp",
+        "Name": "gm-prime-equities-scheduler-group-a2x-sftp",
         "Tags": [
           {
             "Key": "Environment",
@@ -1959,7 +1959,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "gm-prime-scheduler-group-sftp-dlq",
+        "QueueName": "gm-prime-equities-scheduler-group-jse-sftp-dlq",
         "SqsManagedSseEnabled": true,
         "Tags": [
           {
@@ -2007,7 +2007,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
     "JseScheduleGroup09A6B2E2": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "Name": "gm-prime-scheduler-group-sftp",
+        "Name": "gm-prime-equities-scheduler-group-jse-sftp",
         "Tags": [
           {
             "Key": "Environment",
@@ -2185,7 +2185,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
     "RetrievebdaLogs54D92CF1": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-bda",
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-bda-daily",
         "RetentionInDays": 90,
         "Tags": [
           {
@@ -2254,7 +2254,7 @@ exports[`template snapshots (prod) orchestration 1`] = `
             "Arn",
           ],
         },
-        "StateMachineName": "gm-prime-equities-bda",
+        "StateMachineName": "gm-prime-equities-bda-daily",
         "StateMachineType": "STANDARD",
         "Tags": [
           {
@@ -2843,8 +2843,8 @@ exports[`template snapshots (prod) orchestration 1`] = `
         "FlexibleTimeWindow": {
           "Mode": "OFF",
         },
-        "GroupName": "gm-prime-scheduler-group-a2x-sftp",
-        "Name": "gm-prime-equities-sftp-a2x",
+        "GroupName": "gm-prime-equities-scheduler-group-a2x-sftp",
+        "Name": "gm-prime-equities-schedule-a2x-sftp",
         "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
         "ScheduleExpressionTimezone": "Africa/Johannesburg",
         "State": "ENABLED",
@@ -2880,8 +2880,8 @@ exports[`template snapshots (prod) orchestration 1`] = `
         "FlexibleTimeWindow": {
           "Mode": "OFF",
         },
-        "GroupName": "gm-prime-scheduler-group-sftp",
-        "Name": "gm-prime-equities-sftp-bda",
+        "GroupName": "gm-prime-equities-scheduler-group-jse-sftp",
+        "Name": "gm-prime-equities-jse-sftp-bda",
         "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
         "ScheduleExpressionTimezone": "Africa/Johannesburg",
         "State": "ENABLED",
@@ -2917,8 +2917,8 @@ exports[`template snapshots (prod) orchestration 1`] = `
         "FlexibleTimeWindow": {
           "Mode": "OFF",
         },
-        "GroupName": "gm-prime-scheduler-group-sftp",
-        "Name": "gm-prime-equities-sftp-market-data",
+        "GroupName": "gm-prime-equities-scheduler-group-jse-sftp",
+        "Name": "gm-prime-equities-jse-sftp-market-data",
         "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
         "ScheduleExpressionTimezone": "Africa/Johannesburg",
         "State": "ENABLED",
@@ -2954,8 +2954,8 @@ exports[`template snapshots (prod) orchestration 1`] = `
         "FlexibleTimeWindow": {
           "Mode": "OFF",
         },
-        "GroupName": "gm-prime-scheduler-group-sftp",
-        "Name": "gm-prime-equities-sftp-options-data",
+        "GroupName": "gm-prime-equities-scheduler-group-jse-sftp",
+        "Name": "gm-prime-equities-jse-sftp-options-data",
         "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
         "ScheduleExpressionTimezone": "Africa/Johannesburg",
         "State": "ENABLED",
@@ -3326,8 +3326,8 @@ exports[`template snapshots (prod) orchestration 1`] = `
         "FlexibleTimeWindow": {
           "Mode": "OFF",
         },
-        "GroupName": "gm-prime-scheduler-group-sftp",
-        "Name": "gm-prime-equities-sftp-reference-data",
+        "GroupName": "gm-prime-equities-scheduler-group-jse-sftp",
+        "Name": "gm-prime-equities-jse-sftp-reference-data",
         "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
         "ScheduleExpressionTimezone": "Africa/Johannesburg",
         "State": "ENABLED",
@@ -3518,7 +3518,7 @@ exports[`template snapshots (prod) processing 1`] = `
             "POWERTOOLS_SERVICE_NAME": "shadow-rename",
           },
         },
-        "FunctionName": "Shadow-Rename",
+        "FunctionName": "gm-prime-equities-shadow-rename",
         "Handler": "app.lambda_handler",
         "LoggingConfig": {
           "LogGroup": {
@@ -3551,7 +3551,7 @@ exports[`template snapshots (prod) processing 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "shadow-rename-dlq",
+        "QueueName": "gm-prime-equities-shadow-rename-dlq",
         "SqsManagedSseEnabled": true,
         "Tags": [
           {
@@ -3623,7 +3623,7 @@ exports[`template snapshots (prod) processing 1`] = `
     "ShadowRenameLogs5C6F2339": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "LogGroupName": "/aws/lambda/Shadow-Rename",
+        "LogGroupName": "/aws/lambda/gm-prime-equities-shadow-rename",
         "RetentionInDays": 90,
         "Tags": [
           {
@@ -4153,7 +4153,7 @@ def sort_filter_rules(json_obj):
     },
     "DataKeyAliasF989EB84": {
       "Properties": {
-        "AliasName": "alias/prime-prod-file-downloads",
+        "AliasName": "alias/gm-prime-equities-file-downloads-prod",
         "TargetKeyId": {
           "Fn::GetAtt": [
             "DataKey17AFBB84",
@@ -4182,7 +4182,7 @@ def sort_filter_rules(json_obj):
             },
           ],
         },
-        "BucketName": "prime-prod-file-downloads",
+        "BucketName": "gm-prime-equities-file-downloads-prod",
         "LifecycleConfiguration": {
           "Rules": [
             {

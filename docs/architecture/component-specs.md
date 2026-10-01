@@ -12,7 +12,7 @@ This is the build spec for each component in the [architecture](../../README.md#
 
 | Setting | Value | Why |
 | --- | --- | --- |
-| Name | `prime-{env}-file-downloads` | Bucket names are global, so the environment is part of the name |
+| Name | `gm-prime-equities-file-downloads-{env}` | The diagram's name with an environment suffix, because bucket names are global |
 | Encryption | SSE-KMS with a customer-managed key and S3 Bucket Keys | Key policy control and audit; Bucket Keys cut KMS request cost |
 | Public access | Block all | |
 | Transport | `enforceSSL: true` (denies `aws:SecureTransport = false`) | |
@@ -35,13 +35,13 @@ In the final prefix, each JSE file is a date-stamped copy, for example `jse/idp/
 
 ```ts
 const dataKey = new kms.Key(this, 'DataKey', {
-  alias: `alias/prime-${cfg.envName}-file-downloads`,
+  alias: `alias/gm-prime-equities-file-downloads-${cfg.envName}`,
   enableKeyRotation: true,
   removalPolicy: RemovalPolicy.RETAIN,
 });
 
 const bucket = new s3.Bucket(this, 'FileDownloads', {
-  bucketName: `prime-${cfg.envName}-file-downloads`,
+  bucketName: `gm-prime-equities-file-downloads-${cfg.envName}`,
   encryption: s3.BucketEncryption.KMS,
   encryptionKey: dataKey,
   bucketKeyEnabled: true,
@@ -104,6 +104,7 @@ Rotation happens by hand, driven by the vendor. The procedure is in the [runbook
 | --- | --- | --- |
 | Logical name | `A2xSftpConnector` | `JseIdpSftpConnector` |
 | Connection mode | Existing connector ID in dev; created by CDK in uat/prod | Existing connector ID in dev; created by CDK in uat/prod |
+| Dev connector ID | `c-sadfsdfsdfsddfsd` | `c-dsfgdsfgsdfdgsdf` |
 | `Url` when provisioned | `cfg.a2x.sftpUrl` (`sftp://host:22`) | `cfg.jse.sftpUrl` |
 | `SftpConfig.UserSecretId` when provisioned | `prime/{env}/sftp/a2x` | `prime/{env}/sftp/jse-idp` |
 | `SftpConfig.TrustedHostKeys` when provisioned | `cfg.a2x.trustedHostKeys` | `cfg.jse.trustedHostKeys` |
@@ -182,11 +183,11 @@ There's **one reusable construct**, `RetrieveFileStateMachine`, instantiated onc
 
 | Instance (state machine name) | Connector | `localDirectoryPath` |
 | --- | --- | --- |
-| `gm-prime-equities-bda` | JSE IDP | `/prime-{env}-file-downloads/jse/idp/bda/temp` |
-| `gm-prime-equities-market-data` | JSE IDP | `/prime-{env}-file-downloads/jse/idp/market-data/equities/temp` |
-| `gm-prime-equities-reference-data` | JSE IDP | `/prime-{env}-file-downloads/jse/idp/market-data/reference/temp` |
-| `gm-prime-equities-options-data` | JSE IDP | `/prime-{env}-file-downloads/jse/idp/market-data/options/temp` |
-| `gm-prime-equities-a2x-transfer` | A2X | `/prime-{env}-file-downloads/a2x/ftp/reference-data/equities` |
+| `gm-prime-equities-bda-daily` | JSE IDP | `/gm-prime-equities-file-downloads-{env}/jse/idp/bda/temp` |
+| `gm-prime-equities-market-data` | JSE IDP | `/gm-prime-equities-file-downloads-{env}/jse/idp/market-data/equities/temp` |
+| `gm-prime-equities-reference-data` | JSE IDP | `/gm-prime-equities-file-downloads-{env}/jse/idp/market-data/reference/temp` |
+| `gm-prime-equities-options-data` | JSE IDP | `/gm-prime-equities-file-downloads-{env}/jse/idp/market-data/options/temp` |
+| `gm-prime-equities-a2x-transfer` (the diagram's nested "A2X" Step Function) | A2X | `/gm-prime-equities-file-downloads-{env}/a2x/ftp/reference-data/equities` |
 
 Because each environment is a separate AWS account, state machine names don't need an environment suffix.
 
@@ -322,7 +323,7 @@ export class RetrieveFileStateMachine extends Construct {
 
 ### A2X outer state machine
 
-`gm-prime-equities-a2x` is the diagram's outer Step Function. It resolves the business date, builds the remote path, then runs the A2X transfer instance and waits for it to finish.
+`gm-prime-equities-step-function-a2x-sftp` is the diagram's outer Step Function. It resolves the business date, builds the remote path, then runs the A2X transfer instance and waits for it to finish.
 
 ```ts
 const determineDate = new tasks.LambdaInvoke(this, 'DetermineDate', {
@@ -344,7 +345,7 @@ const transfer = new tasks.StepFunctionsStartExecution(this, 'TransferA2xFile', 
 });
 
 new sfn.StateMachine(this, 'A2xOuter', {
-  stateMachineName: 'gm-prime-equities-a2x',
+  stateMachineName: 'gm-prime-equities-step-function-a2x-sftp',
   definitionBody: sfn.DefinitionBody.fromChainable(determineDate.next(transfer)),
   timeout: Duration.minutes(20),
   tracingEnabled: true,
@@ -414,13 +415,13 @@ Two schedule groups, as in the diagram. Each schedule targets one state machine 
 
 | Group | Schedule | Target | Expression (TZ `Africa/Johannesburg`) |
 | --- | --- | --- | --- |
-| `gm-prime-scheduler-group-sftp` | `gm-prime-equities-sftp-bda` | `gm-prime-equities-bda` | `cron(0/30 3-6 ? * MON-FRI *)` → 03:00, 03:30 … 06:30 |
-| `gm-prime-scheduler-group-sftp` | `gm-prime-equities-sftp-market-data` | `gm-prime-equities-market-data` | _TBC_ (see [open questions](decisions.md#open-questions)) |
-| `gm-prime-scheduler-group-sftp` | `gm-prime-equities-sftp-reference-data` | `gm-prime-equities-reference-data` | _TBC_ |
-| `gm-prime-scheduler-group-sftp` | `gm-prime-equities-sftp-options-data` | `gm-prime-equities-options-data` | _TBC_ |
-| `gm-prime-scheduler-group-a2x-sftp` | `gm-prime-equities-sftp-a2x` ¹ | `gm-prime-equities-a2x` | _TBC_ |
+| `gm-prime-equities-scheduler-group-jse-sftp` | `gm-prime-equities-jse-sftp-bda` | `gm-prime-equities-bda-daily` | `cron(0/30 3-6 ? * MON-FRI *)` → 03:00, 03:30 … 06:30 |
+| `gm-prime-equities-scheduler-group-jse-sftp` | `gm-prime-equities-jse-sftp-market-data` | `gm-prime-equities-market-data` | same |
+| `gm-prime-equities-scheduler-group-jse-sftp` | `gm-prime-equities-jse-sftp-reference-data` | `gm-prime-equities-reference-data` | same |
+| `gm-prime-equities-scheduler-group-jse-sftp` | `gm-prime-equities-jse-sftp-options-data` | `gm-prime-equities-options-data` | same |
+| `gm-prime-equities-scheduler-group-a2x-sftp` | `gm-prime-equities-schedule-a2x-sftp` | `gm-prime-equities-step-function-a2x-sftp` | same |
 
-¹ The diagram names this schedule `gm-prime-equities-sftp-bda`, which is the same name as the JSE schedule. We treat that as a copy-paste error and propose `gm-prime-equities-sftp-a2x`. See [open questions](decisions.md#open-questions).
+Every schedule uses the diagram's window (`SFTP_WINDOW` in `infra/config/defaults.ts`). Weekdays only is the [Q4](decisions.md#open-questions) default.
 
 | Setting | Value |
 | --- | --- |
@@ -433,11 +434,11 @@ Two schedule groups, as in the diagram. Each schedule targets one state machine 
 
 ```ts
 const group = new scheduler.ScheduleGroup(this, 'SftpGroup', {
-  scheduleGroupName: 'gm-prime-scheduler-group-sftp',
+  scheduleGroupName: 'gm-prime-equities-scheduler-group-jse-sftp',
 });
 
 new scheduler.Schedule(this, 'BdaSchedule', {
-  scheduleName: 'gm-prime-equities-sftp-bda',
+  scheduleName: 'gm-prime-equities-jse-sftp-bda',
   scheduleGroup: group,
   schedule: scheduler.ScheduleExpression.cron({
     minute: '0/30', hour: '3-6', weekDay: 'MON-FRI',
@@ -464,10 +465,10 @@ new scheduler.Schedule(this, 'BdaSchedule', {
 
 | Setting | Value |
 | --- | --- |
-| Name | `Shadow-Rename` |
+| Name | `gm-prime-equities-shadow-rename` |
 | Runtime / arch | Python 3.14 / arm64 |
 | Memory / timeout | 512 MB / 5 min (resize after UAT file-size measurements) |
-| Trigger | EventBridge rule: `aws.s3` `Object Created`, bucket = `prime-{env}-file-downloads`, key wildcard `jse/idp/*/temp/*` |
+| Trigger | EventBridge rule: `aws.s3` `Object Created`, bucket = `gm-prime-equities-file-downloads-{env}`, key wildcard `jse/idp/*/temp/*` |
 | Concurrency | Reserved concurrency **1**, which serialises processing so two copies of the same file can't race |
 | Failure handling | EventBridge target retry (4 attempts, max age 2 h), then SQS DLQ |
 | Permissions | `s3:ListBucket` on the bucket, `s3:GetObject` on `jse/idp/*`, `s3:PutObject` on `jse/idp/*`, `s3:DeleteObject` on `jse/idp/*/temp/*`, KMS decrypt and encrypt on `dataKey` |

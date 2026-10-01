@@ -6,15 +6,15 @@ import boto3
 import pytest
 from moto import mock_aws
 
-BUCKET = "prime-test-file-downloads"
+BUCKET = "gm-prime-equities-file-downloads-test"
 REGION = "af-south-1"
 
 
 @dataclass
 class LambdaContext:
-    function_name: str = "Shadow-Rename"
+    function_name: str = "gm-prime-equities-shadow-rename"
     memory_limit_in_mb: int = 512
-    invoked_function_arn: str = "arn:aws:lambda:af-south-1:123456789012:function:Shadow-Rename"
+    invoked_function_arn: str = "arn:aws:lambda:af-south-1:123456789012:function:gm-prime-equities-shadow-rename"
     aws_request_id: str = "test-request-id"
 
 

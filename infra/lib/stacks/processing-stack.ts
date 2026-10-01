@@ -18,7 +18,7 @@ export interface ProcessingStackProps extends StackProps {
   readonly bucket: s3.IBucket;
 }
 
-export const SHADOW_RENAME_FUNCTION_NAME = 'Shadow-Rename';
+export const SHADOW_RENAME_FUNCTION_NAME = 'gm-prime-equities-shadow-rename';
 
 /**
  * Shadow-Rename (Python): promotes changed files out of the JSE temp/ folders and discards duplicates.
@@ -56,7 +56,7 @@ export class ProcessingStack extends Stack {
     bucket.grantDelete(fn, JSE_TEMP_KEY_WILDCARD);
     this.shadowRename = fn;
 
-    this.deadLetterQueue = createDeadLetterQueue(this, 'ShadowRenameDlq', 'shadow-rename-dlq');
+    this.deadLetterQueue = createDeadLetterQueue(this, 'ShadowRenameDlq', `${SHADOW_RENAME_FUNCTION_NAME}-dlq`);
 
     new events.Rule(this, 'JseTempObjectCreated', {
       description: 'Invoke Shadow-Rename when a file lands in a JSE temp/ folder',

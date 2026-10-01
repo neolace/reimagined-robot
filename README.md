@@ -28,13 +28,14 @@ Scheduled SFTP ingestion of equities data from A2X and JSE IDP into S3, with an 
 ### Components
 
 - **EventBridge Scheduler groups**
-  - `gm-prime-scheduler-group-a2x-sftp`: one schedule that runs Step Function `gm-prime-equities-a2x`. A Lambda (`gm-prime-equities-date`) works out today's date (`YYYYMMDD`), then a nested Step Function transfers the A2X file.
-  - `gm-prime-scheduler-group-sftp`: four schedules (`bda`, `market-data`, `reference-data`, `options-data`), each running a Step Function that transfers a hardcoded file to a hardcoded folder. The `bda` schedule fires every 30 minutes from 03:00 to 06:30.
-- **AWS Transfer Family**: A2X and JSE IDP SFTP connectors, each pulling from its SFTP server over port 22. Credentials come from AWS Secrets Manager.
-- **S3 bucket `prime-dev-file-downloads`**
+  - `gm-prime-equities-scheduler-group-a2x-sftp`: schedule `gm-prime-equities-schedule-a2x-sftp` runs Step Function `gm-prime-equities-step-function-a2x-sftp`. A Lambda (`gm-prime-equities-date`) works out today's date (`YYYYMMDD`), then a nested Step Function (`gm-prime-equities-a2x-transfer`) transfers the A2X file.
+  - `gm-prime-equities-scheduler-group-jse-sftp`: four schedules (`gm-prime-equities-jse-sftp-bda`, `-market-data`, `-reference-data`, `-options-data`), each running a Step Function (`gm-prime-equities-bda-daily`, `gm-prime-equities-market-data`, `gm-prime-equities-reference-data`, `gm-prime-equities-options-data`) that transfers a hardcoded file to a hardcoded folder.
+  - Every schedule fires every 30 minutes from 03:00 to 06:30 SAST on weekdays.
+- **AWS Transfer Family**: A2X and JSE IDP SFTP connectors, each pulling from its SFTP server over port 22. Credentials come from AWS Secrets Manager. Dev reuses the existing connectors `c-sadfsdfsdfsddfsd` (A2X) and `c-dsfgdsfgsdfdgsdf` (JSE IDP); uat and prod create their own.
+- **S3 bucket `gm-prime-equities-file-downloads-{env}`** (bucket names are global, so each environment adds a suffix)
   - `/a2x/ftp/reference-data/equities/`
   - `/jse/idp/bda/`, `/jse/idp/market-data/equities/`, `/jse/idp/market-data/reference/`, `/jse/idp/market-data/options/`. JSE files land in each folder's `temp/` subfolder first.
-- **Lambda `Shadow-Rename` (Python)**: `lambda_handler` → `file_exists`. Checks the md5 of each file that lands in a JSE `temp/` folder. If a file with that md5 already exists in the parent folder, it deletes the temp file. Otherwise it copies the file to the parent folder with a date-time stamp, for example `BDA_FILE_20261001T033012.csv`, then deletes it from `temp/`. It never overwrites a file.
+- **Lambda `gm-prime-equities-shadow-rename` (Python)**: `lambda_handler` → `file_exists`. Checks the md5 of each file that lands in a JSE `temp/` folder. If a file with that md5 already exists in the parent folder, it deletes the temp file. Otherwise it copies the file to the parent folder with a date-time stamp, for example `BDA_FILE_20261001T033012.csv`, then deletes it from `temp/`. It never overwrites a file.
 
 ### Diagram
 
@@ -57,8 +58,8 @@ flowchart LR
 
     %% ---------- Transfer Family ----------
     subgraph TF["AWS Transfer Family"]
-        CONN_A2X["A2X SFTP Connector"]
-        CONN_JSE["JSE IDP SFTP Connector"]
+        CONN_A2X["A2X SFTP Connector<br/>c-sadfsdfsdfsddfsd"]
+        CONN_JSE["JSE IDP SFTP Connector<br/>c-dsfgdsfgsdfdgsdf"]
     end
 
     CONN_A2X -- "retrieve credentials" --> SEC_A2X
@@ -67,15 +68,15 @@ flowchart LR
     CONN_JSE -- "transfer over 22" --> JSE_SFTP
 
     %% ---------- A2X scheduler ----------
-    subgraph SG_A2X["EventBridge Scheduler Group: gm-prime-scheduler-group-a2x-sftp"]
-        subgraph SCH_A2X["Schedule: gm-prime-equities-schedule-a2x-sftp"]
+    subgraph SG_A2X["EventBridge Scheduler Group: gm-prime-equities-scheduler-group-a2x-sftp"]
+        subgraph SCH_A2X["AWS Schedule: gm-prime-equities-schedule-a2x-sftp"]
             CRON_A2X["Fires at 03:00, every 30 min<br/>until 06:30"]
-            subgraph SF_A2X_OUTER["Step Function: gm-prime-equities-step-function-a2x-sftp"]
+            subgraph SF_A2X_OUTER["AWS Step Function: gm-prime-equities-step-function-a2x-sftp"]
                 subgraph L_DATE["Lambda: gm-prime-equities-date"]
                     DATE["Determine today's date<br/>YYYYMMDD"]
                 end
-                subgraph SF_A2X["Step Function: A2X"]
-                    A2X_XFER["File name with today's date in YYYMMDD<br/> to hardcoded folder"]
+                subgraph SF_A2X["AWS Step Function: A2X"]
+                    A2X_XFER["File name with today's date in YYYYMMDD<br/> to hardcoded folder"]
                 end
                 DATE -- "YYYYMMDD" --> A2X_XFER
             end
@@ -84,25 +85,25 @@ flowchart LR
     end
 
     %% ---------- JSE scheduler ----------
-    subgraph SG_JSE["EventBridge Scheduler Group: gm-prime-scheduler-group-sftp"]
-        subgraph SCH_BDA["Schedule: gm-prime-equities-sftp-bda"]
+    subgraph SG_JSE["EventBridge Scheduler Group: gm-prime-equities-scheduler-group-jse-sftp"]
+        subgraph SCH_BDA["AWS Schedule: gm-prime-equities-jse-sftp-bda"]
             CRON_BDA["Fires at 03:00, every 30 min<br/>until 06:30"]
-            SF_BDA["Step Function: gm-prime-equities-bda<br/>Transfer hardcoded file name to hardcoded folder"]
+            SF_BDA["AWS Step Function - gm-prime-equities-bda-daily<br/>Transfer hardcoded file name to hardcoded folder"]
             CRON_BDA --> SF_BDA
         end
-        subgraph SCH_MKT["Schedule: gm-prime-equities-sftp-market-data"]
+        subgraph SCH_MKT["AWS Schedule: gm-prime-equities-jse-sftp-market-data"]
             CRON_MKT["Fires at 03:00, every 30 min<br/>until 06:30"]
-            SF_MKT["Step Function<br/>Transfer hardcoded file name to hardcoded folder"]
+            SF_MKT["AWS Step Function - gm-prime-equities-market-data<br/>Transfer hardcoded file name to hardcoded folder"]
             CRON_MKT --> SF_MKT
         end
-        subgraph SCH_REF["Schedule: gm-prime-equities-sftp-reference-data"]
+        subgraph SCH_REF["AWS Schedule: gm-prime-equities-jse-sftp-reference-data"]
             CRON_REF["Fires at 03:00, every 30 min<br/>until 06:30"]
-            SF_REF["Step Function<br/>Transfer hardcoded file name to hardcoded folder"]
+            SF_REF["AWS Step Function - gm-prime-equities-reference-data<br/>Transfer hardcoded file name to hardcoded folder"]
             CRON_REF --> SF_REF
         end
-        subgraph SCH_OPT["Schedule: gm-prime-equities-sftp-options-data"]
+        subgraph SCH_OPT["AWS Schedule: gm-prime-equities-jse-sftp-options-data"]
             CRON_OPT["Fires at 03:00, every 30 min<br/>until 06:30"]
-            SF_OPT["Step Function<br/>Transfer hardcoded file name to hardcoded folder"]
+            SF_OPT["AWS Step Function - gm-prime-equities-options-data<br/>Transfer hardcoded file name to hardcoded folder"]
             CRON_OPT --> SF_OPT
         end
     end
@@ -114,13 +115,13 @@ flowchart LR
     SF_OPT --> CONN_JSE
 
     %% ---------- S3: A2X ----------
-    subgraph S3_A2X["AWS S3: prime-dev-file-downloads"]
+    subgraph S3_A2X["AWS S3: gm-prime-equities-file-downloads"]
         A2X_FOLDER["/a2x/ftp/reference-data/equities/"]
     end
     A2X_XFER --> A2X_FOLDER
 
     %% ---------- S3: JSE ----------
-    subgraph S3_JSE["AWS S3: prime-dev-file-downloads"]
+    subgraph S3_JSE["AWS S3: gm-prime-equities-file-downloads"]
         subgraph F_BDA["/jse/idp/bda/"]
             T_BDA["temp/"]
         end
@@ -140,21 +141,21 @@ flowchart LR
     SF_REF --> T_REF
     SF_OPT --> T_OPT
 
-    %% ---------- Shadow-Rename Lambda ----------
-    subgraph LAMBDA["AWS Lambda (Python): Shadow-Rename"]
+    %% ---------- gm-prime-equities-shadow-rename ----------
+    subgraph LAMBDA["AWS Lambda (Python): gm-prime-equities-shadow-rename"]
         HANDLER["lambda_handler"]
         EXISTS["file_exists"]
         HANDLER --> EXISTS
     end
 
-    EXISTS -. "check md5 for a match of file in temp folder" .-> T_BDA
-    EXISTS -. "check md5 for a match of file in temp folder" .-> T_MKT
-    EXISTS -. "check md5 for a match of file in temp folder" .-> T_REF
-    EXISTS -. "check md5 for a match of file in temp folder" .-> T_OPT
-    HANDLER -- "files moved / renamed after md5 check" --> F_BDA
-    HANDLER -- "files moved / renamed after md5 check" --> F_MKT
-    HANDLER -- "files moved / renamed after md5 check" --> F_REF
-    HANDLER -- "files moved / renamed after md5 check" --> F_OPT
+    EXISTS -. "check md5 for a match" .-> T_BDA
+    EXISTS -. "check md5 for a match" .-> T_MKT
+    EXISTS -. "check md5 for a match" .-> T_REF
+    EXISTS -. "check md5 for a match" .-> T_OPT
+    HANDLER -- "files copied after md5 check" --> F_BDA
+    HANDLER -- "files copied after md5 check" --> F_MKT
+    HANDLER -- "files copied after md5 check" --> F_REF
+    HANDLER -- "files copied after md5 check" --> F_OPT
 
     %% ---------- Styling ----------
     classDef red fill:#2a1414,stroke:#e03131,color:#fff
@@ -172,4 +173,4 @@ flowchart LR
 
 ### Open questions
 
-- **Secret names**: the diagram uses the placeholders "A2X SFTP Secret" and "JSE IDP SFTP Secret".
+- **Secret names**: the diagram uses the placeholders "A2X SFTP Secret" and "JSE IDP SFTP Secret". They are not implemented to the diagram yet; uat and prod keep the interim names `prime/{env}/sftp/a2x` and `prime/{env}/sftp/jse-idp`, and dev uses the existing connectors' own secrets.

@@ -101,7 +101,7 @@ Most of this work is external lead time. Start it first, because the vendors wil
 | --- | --- |
 | Scaffold the npm workspace, TypeScript, ESLint, Prettier and Jest | [Repo layout](#target-repository-layout) |
 | Create `EnvironmentConfig` and the per-environment config files | [Environments](operations/environments-and-deployment.md#configuration) |
-| `StorageStack`: customer-managed KMS key and the `prime-{env}-file-downloads` bucket | [S3](architecture/component-specs.md#1-s3-bucket-and-kms-key) |
+| `StorageStack`: customer-managed KMS key and the `gm-prime-equities-file-downloads-{env}` bucket | [S3](architecture/component-specs.md#1-s3-bucket-and-kms-key) |
 | Apply `cdk-nag` to every stage (`AwsSolutionsPlugin`) | [Testing](operations/testing-strategy.md#static-analysis) |
 | CI pipeline: lint, `tsc`, Jest, pytest, `cdk synth`, cdk-nag | [Deployment](operations/environments-and-deployment.md#cicd-pipeline) |
 | Apply tags to the app: `Project`, `Environment`, `Owner`, `CostCentre` | [Well-Architected: Cost](architecture/well-architected-review.md#cost-optimization) |
@@ -128,7 +128,7 @@ Most of this work is external lead time. Start it first, because the vendors wil
 **Acceptance criteria**
 
 - [ ] `test-connection` returns `Status: OK` for both connectors in dev.
-- [ ] A manual retrieval lands a file in `s3://prime-dev-file-downloads/jse/idp/bda/temp/`.
+- [ ] A manual retrieval lands a file in `s3://gm-prime-equities-file-downloads-dev/jse/idp/bda/temp/`.
 - [ ] The spike results are written into [component-specs.md](architecture/component-specs.md#transfer-result-codes), with the exact failure code for "file not found".
 
 ---
@@ -138,9 +138,9 @@ Most of this work is external lead time. Start it first, because the vendors wil
 | Task | Spec |
 | --- | --- |
 | Build the reusable `RetrieveFileStateMachine` construct | [Step Functions](architecture/component-specs.md#4-step-functions-retrieve-file-state-machine) |
-| Create four instances: `gm-prime-equities-bda`, `-market-data`, `-reference-data`, `-options-data` | same |
+| Create four instances: `gm-prime-equities-bda-daily`, `gm-prime-equities-market-data`, `-reference-data`, `-options-data` | same |
 | Build the reusable `FeedSchedule` construct: schedule, role, DLQ and retry policy | [Scheduler](architecture/component-specs.md#6-eventbridge-scheduler) |
-| Create scheduler group `gm-prime-scheduler-group-sftp` and four schedules | same |
+| Create scheduler group `gm-prime-equities-scheduler-group-jse-sftp` and four schedules (`gm-prime-equities-jse-sftp-*`) | same |
 
 **Acceptance criteria**
 
@@ -172,8 +172,8 @@ Most of this work is external lead time. Start it first, because the vendors wil
 | --- | --- |
 | Date Lambda `gm-prime-equities-date` (TypeScript) | [Date Lambda](architecture/component-specs.md#5-date-lambda-typescript) |
 | An A2X instance of `RetrieveFileStateMachine` whose remote path is built from the date | [Step Functions](architecture/component-specs.md#a2x-outer-state-machine) |
-| Outer state machine `gm-prime-equities-a2x`: date Lambda, then `startExecution.sync:2` | same |
-| Scheduler group `gm-prime-scheduler-group-a2x-sftp` and its schedule | [Scheduler](architecture/component-specs.md#6-eventbridge-scheduler) |
+| Outer state machine `gm-prime-equities-step-function-a2x-sftp`: date Lambda, then `startExecution.sync:2` | same |
+| Scheduler group `gm-prime-equities-scheduler-group-a2x-sftp` and its schedule `gm-prime-equities-schedule-a2x-sftp` | [Scheduler](architecture/component-specs.md#6-eventbridge-scheduler) |
 
 **Acceptance criteria**
 
