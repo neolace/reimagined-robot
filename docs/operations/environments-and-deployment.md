@@ -83,6 +83,7 @@ Implemented with **GitHub Actions** and OIDC roles:
 Each GitHub environment (`dev`, `uat`, `prod`) needs a variable `AWS_DEPLOY_ROLE_ARN`, the OIDC role in that account. `uat` and `prod` need **required reviewers** configured as environment protection rules; those are the manual approval gates.
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"darkMode": true, "background": "#0d1117", "primaryColor": "#1c1f24", "primaryTextColor": "#e9ecef", "primaryBorderColor": "#868e96", "lineColor": "#8b949e", "arrowheadColor": "#8b949e", "clusterBkg": "#161b22", "clusterBorder": "#495057", "titleColor": "#e9ecef", "edgeLabelBackground": "#1c1f24", "noteBkgColor": "#2a1e0f", "noteTextColor": "#ffd8a8", "noteBorderColor": "#f08c00"}}}%%
 flowchart LR
     PR[Pull request] --> CI
     subgraph CI["Build & verify (every PR and merge)"]
@@ -98,6 +99,15 @@ flowchart LR
     GATE1 --> UAT[Deploy uat]
     UAT --> GATE2{{Manual approval + UAT sign-off}}
     GATE2 --> PROD[Deploy prod]
+
+    classDef blue fill:#14143a,stroke:#3b5bdb,color:#fff
+    classDef green fill:#0f2a14,stroke:#2f9e44,color:#b2f2bb
+    classDef teal fill:#0f2a2a,stroke:#12b886,color:#c3fae8
+    classDef orange fill:#2a1e0f,stroke:#f08c00,color:#ffd8a8
+    class A,B,C,D,E,F blue
+    class SMOKE green
+    class DEV,UAT,PROD teal
+    class GATE1,GATE2 orange
 ```
 
 | Step | Command |

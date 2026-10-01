@@ -11,13 +11,13 @@ export const devConfig: EnvironmentConfig = {
   alarmEmails: ['tertius.geldenhuys@standardbank.co.za'],
   fileDeadline: { hour: 7, minute: 0 },
   jse: {
-    connectorId: 'c-sadfsdfsdfsd',
+    connectorId: 'c-sadfsdfsdfsddfsd',
     fileNotFoundFailureCode: FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER,
     feeds: jseFeeds(false),
   },
   a2x: {
     enabled: false,
-    connectorId: 'c-dsfgdsfgsdf',
+    connectorId: 'c-dsfgdsfgsdfdgsdf',
     fileNotFoundFailureCode: FILE_NOT_FOUND_FAILURE_CODE_PLACEHOLDER,
     remotePathTemplate: '/outbound/equities/EQ_REF_{}.csv', // REPLACE_ME (Q2)
     schedule: BDA_WINDOW, // TODO(Q3)

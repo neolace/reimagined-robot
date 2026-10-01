@@ -59,7 +59,7 @@ describe('TransferStack', () => {
 
   test('dev retrieval tasks use the configured connector IDs and ARNs', () => {
     const template = json(devTransfer.toJSON());
-    for (const connectorId of ['c-sadfsdfsdfsd', 'c-dsfgdsfgsdf']) {
+    for (const connectorId of ['c-sadfsdfsdfsddfsd', 'c-dsfgdsfgsdfdgsdf']) {
       expect(template).toContain(connectorId);
       expect(template).toContain(`transfer:${devConfig.region}:${devConfig.account}:connector/${connectorId}`);
     }

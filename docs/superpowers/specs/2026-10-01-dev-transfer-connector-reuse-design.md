@@ -6,7 +6,7 @@ The dev configuration currently describes vendor SFTP endpoints and host keys, a
 
 ## Design
 
-Represent a vendor connection as either an existing connector ID or the current endpoint/host-key configuration. In dev, configure JSE with connector ID `c-sadfsdfsdfsd` and A2X with connector ID `c-dsfgdsfgsdf`. In uat and prod, retain the endpoint/host-key configuration and the existing connector provisioning path.
+Represent a vendor connection as either an existing connector ID or the current endpoint/host-key configuration. In dev, configure JSE with connector ID `c-sadfsdfsdfsddfsd` and A2X with connector ID `c-dsfgdsfgsdfdgsdf`. In uat and prod, retain the endpoint/host-key configuration and the existing connector provisioning path.
 
 For an existing connector, the CDK stage will construct its connector ID and ARN references for the Step Functions tasks and their resource-scoped IAM permissions. If both connectors are imported, it will omit the empty Transfer stack entirely. It will not create a connector, credential secret, connector access role, or connector logging role for an imported vendor. The existing connector's access role is already configured with the required S3 bucket and prefix permissions. The stage will continue to provision those resources and emit connector outputs for environments that create connectors.
 

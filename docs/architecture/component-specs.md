@@ -201,6 +201,7 @@ The design supports **one file per execution**, which keeps result evaluation si
 **Flow**
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"darkMode": true, "background": "#0d1117", "primaryColor": "#1c1f24", "primaryTextColor": "#e9ecef", "primaryBorderColor": "#868e96", "lineColor": "#8b949e", "arrowheadColor": "#8b949e", "clusterBkg": "#161b22", "clusterBorder": "#495057", "titleColor": "#e9ecef", "edgeLabelBackground": "#1c1f24", "noteBkgColor": "#2a1e0f", "noteTextColor": "#ffd8a8", "noteBorderColor": "#f08c00"}}}%%
 stateDiagram-v2
     [*] --> StartFileTransfer
     StartFileTransfer --> WaitForTransfer
@@ -213,6 +214,15 @@ stateDiagram-v2
     Succeeded --> [*]
     FileNotAvailable --> [*]
     TransferFailed --> [*]
+
+    classDef blue fill:#14143a,stroke:#3b5bdb,color:#fff
+    classDef green fill:#0f2a14,stroke:#2f9e44,color:#b2f2bb
+    classDef orange fill:#2a1e0f,stroke:#f08c00,color:#ffd8a8
+    classDef red fill:#2a1414,stroke:#e03131,color:#fff
+    class StartFileTransfer, ListFileTransferResults blue
+    class Succeeded green
+    class FileNotAvailable orange
+    class TransferFailed red
 ```
 
 | Setting | Value |

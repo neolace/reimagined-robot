@@ -50,6 +50,7 @@ reimagined-robot/
 ## Phases
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"darkMode": true, "background": "#0d1117", "primaryColor": "#1c1f24", "primaryTextColor": "#e9ecef", "primaryBorderColor": "#868e96", "lineColor": "#8b949e", "arrowheadColor": "#8b949e", "clusterBkg": "#161b22", "clusterBorder": "#495057", "titleColor": "#e9ecef", "edgeLabelBackground": "#1c1f24", "noteBkgColor": "#2a1e0f", "noteTextColor": "#ffd8a8", "noteBorderColor": "#f08c00"}}}%%
 flowchart LR
     P0[0 · Prerequisites] --> P1[1 · Foundation]
     P1 --> P2[2 · Connectors + spike]
@@ -59,6 +60,13 @@ flowchart LR
     P4 --> P6[6 · Observability]
     P5 --> P6
     P6 --> P7[7 · uat → prod]
+
+    classDef blue fill:#14143a,stroke:#3b5bdb,color:#fff
+    classDef teal fill:#0f2a2a,stroke:#12b886,color:#c3fae8
+    classDef orange fill:#2a1e0f,stroke:#f08c00,color:#ffd8a8
+    class P1,P2,P3,P4,P5,P6 blue
+    class P7 teal
+    class P0 orange
 ```
 
 Phases 3 and 5 can run in parallel once the connectors work.

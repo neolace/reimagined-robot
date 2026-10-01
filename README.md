@@ -39,6 +39,7 @@ Scheduled SFTP ingestion of equities data from A2X and JSE IDP into S3, with an 
 ### Diagram
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"darkMode": true, "background": "#0d1117", "primaryColor": "#1c1f24", "primaryTextColor": "#e9ecef", "primaryBorderColor": "#868e96", "lineColor": "#8b949e", "arrowheadColor": "#8b949e", "clusterBkg": "#161b22", "clusterBorder": "#495057", "titleColor": "#e9ecef", "edgeLabelBackground": "#1c1f24", "noteBkgColor": "#2a1e0f", "noteTextColor": "#ffd8a8", "noteBorderColor": "#f08c00"}}}%%
 flowchart LR
     %% ---------- External SFTP servers ----------
     subgraph EXT_A2X["A2X"]
@@ -172,4 +173,3 @@ flowchart LR
 ### Open questions
 
 - **Secret names**: the diagram uses the placeholders "A2X SFTP Secret" and "JSE IDP SFTP Secret".
-- **A2X schedule name** (`gm-prime-equities-sftp-bda`): the source diagram gives the A2X schedule the same name as the JSE `bda` schedule. Probably a copy-paste error.

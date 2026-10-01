@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- The supplied dev IDs are JSE `c-sadfsdfsdfsd` and A2X `c-dsfgdsfgsdf`.
+- The supplied dev IDs are JSE `c-sadfsdfsdfsddfsd` and A2X `c-dsfgdsfgsdfdgsdf`.
 - These IDs apply only to dev in `af-south-1`; uat and prod keep their existing endpoint/host-key provisioning path.
 - Existing connector roles already have the S3 access required by this app; do not modify or recreate them.
 - Retrieval state machine behavior, schedules, file-not-found handling, and S3 paths remain unchanged.
@@ -42,7 +42,7 @@
 
 - [ ] **Step 1: Add failing dev-import assertions**
 
-Update `test/transfer-stack.test.ts` so tests for connector creation use `uatConfig`, and add dev assertions that `AWS::Transfer::Connector`, `AWS::SecretsManager::Secret`, and connector-specific `AWS::IAM::Role` resources are absent. In the same test, construct retrieval state machines using the dev connector references and assert their task definitions contain IDs `c-sadfsdfsdfsd` and `c-dsfgdsfgsdf`, and their generated IAM policies scope transfer actions to those connector ARNs.
+Update `test/transfer-stack.test.ts` so tests for connector creation use `uatConfig`, and add dev assertions that `AWS::Transfer::Connector`, `AWS::SecretsManager::Secret`, and connector-specific `AWS::IAM::Role` resources are absent. In the same test, construct retrieval state machines using the dev connector references and assert their task definitions contain IDs `c-sadfsdfsdfsddfsd` and `c-dsfgdsfgsdfdgsdf`, and their generated IAM policies scope transfer actions to those connector ARNs.
 
 - [ ] **Step 2: Run the focused tests and verify the new assertions fail**
 
