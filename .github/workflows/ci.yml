@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: src/lambdas/shadow_rename/requirements-dev.txt
+
+      - name: Install
+        run: |
+          npm ci
+          pip install -r src/lambdas/shadow_rename/requirements-dev.txt
+
+      - name: Lint
+        run: |
+          npm run lint
+          ruff check src/lambdas/shadow_rename
+          ruff format --check src/lambdas/shadow_rename
+
+      - name: Type-check
+        run: npm run build
+
+      - name: Unit tests (Jest)
+        run: npm test -- --ci
+
+      - name: Unit tests (pytest, Shadow-Rename)
+        working-directory: src/lambdas/shadow_rename
+        run: pytest -q
+
+      - name: Synthesize (cdk-nag runs as a validation plugin)
+        run: npx cdk synth --quiet
+
+      - name: Fail on cdk-nag violations
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'cdk.out/validation-report.json';
+            if (!fs.existsSync(path)) process.exit(0);
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const violations = report.pluginReports.flatMap((r) => r.violations);
+            if (violations.length) { console.error(JSON.stringify(violations, null, 2)); process.exit(1); }
+          "
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: cloud-assembly
+          path: cdk.out
+          retention-days: 14

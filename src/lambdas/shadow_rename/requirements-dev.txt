@@ -1,0 +1,5 @@
+-r requirements.txt
+boto3
+moto[s3]>=5
+pytest>=8
+ruff

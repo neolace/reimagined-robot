@@ -1,0 +1,19 @@
+node_modules/
+cdk.out/
+*.js
+!jest.config.js
+!jest.integration.config.js
+*.d.ts
+.cdk.staging/
+coverage/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Local secrets – never commit
+*.secret.json
+new-secret.json

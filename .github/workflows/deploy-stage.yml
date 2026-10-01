@@ -1,0 +1,55 @@
+name: Deploy stage
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      run-id:
+        description: CI run that produced the cloud assembly
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-assembly
+          path: cdk.out
+          run-id: ${{ inputs.run-id }}
+          github-token: ${{ github.token }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: af-south-1
+
+      - name: Deploy Prime-${{ inputs.environment }}
+        run: npx cdk deploy --app cdk.out "Prime-${{ inputs.environment }}/*" --require-approval never
+
+      - name: Smoke test
+        run: |
+          for id in $(aws cloudformation describe-stacks --stack-name "Prime-${{ inputs.environment }}-Transfer" \
+              --query "Stacks[0].Outputs[?ends_with(OutputKey, 'ConnectorId')].OutputValue" --output text); do
+            status=$(aws transfer test-connection --connector-id "$id" --query Status --output text)
+            echo "Connector $id: $status"
+            [ "$status" = "OK" ] || exit 1
+          done

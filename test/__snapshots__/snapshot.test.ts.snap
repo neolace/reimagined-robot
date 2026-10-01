@@ -1,0 +1,5032 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`template snapshots (prod) monitoring 1`] = `
+{
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "A2xScheduleDlqnotempty9D1E2379": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Messages in A2xScheduleDlq. Runbook: docs/operations/observability-and-runbook.md#messages-in-a-dlq",
+        "AlarmName": "prime-prod-A2xScheduleDlq-not-empty",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputFnGetAttA2xScheduleDlq4EEF2957QueueName2C6B8536",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "AlertTopic2720D535": {
+      "Properties": {
+        "KmsMasterKeyId": {
+          "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TopicName": "prime-prod-ingestion-alerts",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "AlertTopicPolicy3376BC02": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": {
+                "Ref": "AlertTopic2720D535",
+              },
+              "Sid": "AllowPublishThroughSSLOnly",
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Ref": "AlertTopic2720D535",
+              },
+              "Sid": "1",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
+    },
+    "AlertTopicprimeingestionalertsexamplecomD4FC183C": {
+      "Properties": {
+        "Endpoint": "prime-ingestion-alerts@example.com",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "AlertTopic2720D535",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+    "ConnectorRetrieveFailedA090DFC5": {
+      "Properties": {
+        "Description": "Notify on any SFTP connector retrieve failure",
+        "EventPattern": {
+          "detail-type": [
+            "SFTP Connector File Retrieve Failed",
+          ],
+          "source": [
+            "aws.transfer",
+          ],
+        },
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "AlertTopic2720D535",
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "Dashboard9E4231ED": {
+      "Properties": {
+        "DashboardBody": {
+          "Fn::Join": [
+            "",
+            [
+              "{"start":"-P1D","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# Prime SFTP ingestion (prod)\\nJSE feeds poll 03:00–06:30 SAST on weekdays. Missing files are checked at 07:00. Runbook: \`docs/operations/observability-and-runbook.md\`"}},{"type":"alarm","width":24,"height":6,"x":0,"y":2,"properties":{"title":"Alarms","alarms":["",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesbdafailedD63E92D9",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesbdatimedoutC10107C2",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesmarketdatafailed0A73FD66",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesmarketdatatimedout89DA5533",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesreferencedatafailed2701A0AF",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesreferencedatatimedoutCE857FB1",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesoptionsdatafailedA2A2CAFD",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesoptionsdatatimedout8D278156",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesa2xtransferfailed126FF52D",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesa2xtransfertimedout779BA98C",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesa2xfailedAEDCF23F",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "gmprimeequitiesa2xtimedout901D712C",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "EquitiesDateerrors72E1F58B",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "ShadowRenameerrorsF7E886D1",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "FileDeadlineCheckerrors249613CC",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "JseScheduleDlqnotempty73CD67F1",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "A2xScheduleDlqnotempty9D1E2379",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "ShadowRenameDlqnotempty54856D52",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "DeadlineCheckDlqnotempty45DF9A2A",
+                  "Arn",
+                ],
+              },
+              ""]}},{"type":"metric","width":12,"height":6,"x":0,"y":8,"properties":{"view":"timeSeries","title":"Executions succeeded","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
+              },
+              "",{"label":"gm-prime-equities-bda","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
+              },
+              "",{"label":"gm-prime-equities-market-data","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983",
+              },
+              "",{"label":"gm-prime-equities-reference-data","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C",
+              },
+              "",{"label":"gm-prime-equities-options-data","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA",
+              },
+              "",{"label":"gm-prime-equities-a2x-transfer","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsSucceeded","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+              },
+              "",{"label":"gm-prime-equities-a2x","period":3600,"stat":"Sum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":12,"y":8,"properties":{"view":"timeSeries","title":"Executions failed / timed out","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/States","ExecutionsFailed","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
+              },
+              "",{"label":"gm-prime-equities-bda failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
+              },
+              "",{"label":"gm-prime-equities-bda timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
+              },
+              "",{"label":"gm-prime-equities-market-data failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
+              },
+              "",{"label":"gm-prime-equities-market-data timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983",
+              },
+              "",{"label":"gm-prime-equities-reference-data failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983",
+              },
+              "",{"label":"gm-prime-equities-reference-data timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C",
+              },
+              "",{"label":"gm-prime-equities-options-data failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C",
+              },
+              "",{"label":"gm-prime-equities-options-data timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA",
+              },
+              "",{"label":"gm-prime-equities-a2x-transfer failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA",
+              },
+              "",{"label":"gm-prime-equities-a2x-transfer timed out","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsFailed","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+              },
+              "",{"label":"gm-prime-equities-a2x failed","period":3600,"stat":"Sum"}],["AWS/States","ExecutionsTimedOut","StateMachineArn","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+              },
+              "",{"label":"gm-prime-equities-a2x timed out","period":3600,"stat":"Sum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":0,"y":14,"properties":{"view":"timeSeries","title":"Lambda invocations / errors","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Invocations","FunctionName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefEquitiesDate1E2CDBA6F00F119D",
+              },
+              "",{"label":"EquitiesDate","stat":"Sum"}],["AWS/Lambda","Invocations","FunctionName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Processing:ExportsOutputRefShadowRename90956408E183C453",
+              },
+              "",{"label":"ShadowRename","stat":"Sum"}],["AWS/Lambda","Invocations","FunctionName","",
+              {
+                "Ref": "FileDeadlineCheck49904097",
+              },
+              "",{"label":"FileDeadlineCheck","stat":"Sum"}],["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefEquitiesDate1E2CDBA6F00F119D",
+              },
+              "",{"label":"EquitiesDate errors","stat":"Sum","yAxis":"right"}],["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Processing:ExportsOutputRefShadowRename90956408E183C453",
+              },
+              "",{"label":"ShadowRename errors","stat":"Sum","yAxis":"right"}],["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Ref": "FileDeadlineCheck49904097",
+              },
+              "",{"label":"FileDeadlineCheck errors","stat":"Sum","yAxis":"right"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":12,"y":14,"properties":{"view":"timeSeries","title":"Lambda duration p95","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefEquitiesDate1E2CDBA6F00F119D",
+              },
+              "",{"label":"EquitiesDate","stat":"p95"}],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Processing:ExportsOutputRefShadowRename90956408E183C453",
+              },
+              "",{"label":"ShadowRename","stat":"p95"}],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Ref": "FileDeadlineCheck49904097",
+              },
+              "",{"label":"FileDeadlineCheck","stat":"p95"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":0,"y":20,"properties":{"view":"timeSeries","title":"Dead-letter queue depth","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputFnGetAttJseScheduleDlq58400E37QueueName9B452DEA",
+              },
+              "",{"label":"JseScheduleDlq","stat":"Maximum"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputFnGetAttA2xScheduleDlq4EEF2957QueueName2C6B8536",
+              },
+              "",{"label":"A2xScheduleDlq","stat":"Maximum"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","",
+              {
+                "Fn::ImportValue": "Prime-prod-Processing:ExportsOutputFnGetAttShadowRenameDlq4BD9C860QueueName7E8ADBAB",
+              },
+              "",{"label":"ShadowRenameDlq","stat":"Maximum"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","",
+              {
+                "Fn::GetAtt": [
+                  "DeadlineCheckDlqBCE549CD",
+                  "QueueName",
+                ],
+              },
+              "",{"label":"DeadlineCheckDlq","stat":"Maximum"}]],"yAxis":{}}},{"type":"metric","width":12,"height":6,"x":12,"y":20,"properties":{"view":"timeSeries","title":"Missing files at deadline","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["PrimeSftpIngestion","FileMissing","Feed","bda","service","gm-prime-file-deadline-check",{"label":"bda","period":86400,"stat":"Sum"}],["PrimeSftpIngestion","FileMissing","Feed","marketData","service","gm-prime-file-deadline-check",{"label":"marketData","period":86400,"stat":"Sum"}],["PrimeSftpIngestion","FileMissing","Feed","referenceData","service","gm-prime-file-deadline-check",{"label":"referenceData","period":86400,"stat":"Sum"}],["PrimeSftpIngestion","FileMissing","Feed","optionsData","service","gm-prime-file-deadline-check",{"label":"optionsData","period":86400,"stat":"Sum"}],["PrimeSftpIngestion","FileMissing","Feed","a2x","service","gm-prime-file-deadline-check",{"label":"a2x","period":86400,"stat":"Sum"}]],"yAxis":{}}}]}",
+            ],
+          ],
+        },
+        "DashboardName": "prime-prod-sftp-ingestion",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::CloudWatch::Dashboard",
+    },
+    "DeadlineCheckDlqBCE549CD": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "gm-prime-file-deadline-check-dlq",
+        "SqsManagedSseEnabled": true,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "DeadlineCheckDlqPolicyF5FCAE1C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DeadlineCheckDlqBCE549CD",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "DeadlineCheckDlqBCE549CD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "DeadlineCheckDlqnotempty45DF9A2A": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Messages in DeadlineCheckDlq. Runbook: docs/operations/observability-and-runbook.md#messages-in-a-dlq",
+        "AlarmName": "prime-prod-DeadlineCheckDlq-not-empty",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "DeadlineCheckDlqBCE549CD",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "DeadlineCheckSchedule83AF226D": {
+      "Properties": {
+        "FlexibleTimeWindow": {
+          "Mode": "OFF",
+        },
+        "Name": "gm-prime-file-deadline-check",
+        "ScheduleExpression": "cron(0 7 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Africa/Johannesburg",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Fn::GetAtt": [
+              "FileDeadlineCheck49904097",
+              "Arn",
+            ],
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "DeadlineCheckDlqBCE549CD",
+                "Arn",
+              ],
+            },
+          },
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 1800,
+            "MaximumRetryAttempts": 2,
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRoleForTarget7b84e9927CBE28",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::Scheduler::Schedule",
+    },
+    "EquitiesDateerrors72E1F58B": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Lambda errors. Runbook: docs/operations/observability-and-runbook.md",
+        "AlarmName": "prime-prod-EquitiesDate-errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefEquitiesDate1E2CDBA6F00F119D",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FileDeadlineCheck49904097": {
+      "DependsOn": [
+        "FileDeadlineCheckServiceRoleDefaultPolicy828A0FF5",
+        "FileDeadlineCheckServiceRole80CFDFCA",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-333333333333-af-south-1",
+          "S3Key": "<asset-hash>.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "ALERT_TOPIC_ARN": {
+              "Ref": "AlertTopic2720D535",
+            },
+            "BUCKET_NAME": {
+              "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+            },
+            "FEEDS": "[{"feed":"bda","kind":"fixed","key":"jse/idp/bda/BDA_FILE.csv"},{"feed":"marketData","kind":"fixed","key":"jse/idp/market-data/equities/EQUITIES_FILE.csv"},{"feed":"referenceData","kind":"fixed","key":"jse/idp/market-data/reference/REFERENCE_FILE.csv"},{"feed":"optionsData","kind":"fixed","key":"jse/idp/market-data/options/OPTIONS_FILE.csv"},{"feed":"a2x","kind":"dated","key":"a2x/ftp/reference-data/equities/EQ_REF_{}.csv"}]",
+            "POWERTOOLS_LOG_LEVEL": "INFO",
+            "POWERTOOLS_METRICS_NAMESPACE": "PrimeSftpIngestion",
+            "POWERTOOLS_SERVICE_NAME": "gm-prime-file-deadline-check",
+          },
+        },
+        "FunctionName": "gm-prime-file-deadline-check",
+        "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "FileDeadlineCheckLogsD47A9AE9",
+          },
+        },
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "FileDeadlineCheckServiceRole80CFDFCA",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs24.x",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Timeout": 30,
+        "TracingConfig": {
+          "Mode": "Active",
+        },
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "FileDeadlineCheckLogsD47A9AE9": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/gm-prime-file-deadline-check",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FileDeadlineCheckServiceRole80CFDFCA": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "FileDeadlineCheckServiceRoleDefaultPolicy828A0FF5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AlertTopic2720D535",
+              },
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "FileDeadlineCheckServiceRoleDefaultPolicy828A0FF5",
+        "Roles": [
+          {
+            "Ref": "FileDeadlineCheckServiceRole80CFDFCA",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "FileDeadlineCheckerrors249613CC": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Deadline check failed.",
+        "AlarmName": "prime-prod-FileDeadlineCheck-errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "FileDeadlineCheck49904097",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "JseScheduleDlqnotempty73CD67F1": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Messages in JseScheduleDlq. Runbook: docs/operations/observability-and-runbook.md#messages-in-a-dlq",
+        "AlarmName": "prime-prod-JseScheduleDlq-not-empty",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputFnGetAttJseScheduleDlq58400E37QueueName9B452DEA",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SchedulerRoleForTarget7b84e9927CBE28": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":scheduler:af-south-1:333333333333:schedule-group/default",
+                      ],
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SchedulerRoleForTarget7b84e9DefaultPolicyC37576BC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FileDeadlineCheck49904097",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FileDeadlineCheck49904097",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DeadlineCheckDlqBCE549CD",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SchedulerRoleForTarget7b84e9DefaultPolicyC37576BC",
+        "Roles": [
+          {
+            "Ref": "SchedulerRoleForTarget7b84e9927CBE28",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ShadowRenameDlqnotempty54856D52": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Messages in ShadowRenameDlq. Runbook: docs/operations/observability-and-runbook.md#messages-in-a-dlq",
+        "AlarmName": "prime-prod-ShadowRenameDlq-not-empty",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Processing:ExportsOutputFnGetAttShadowRenameDlq4BD9C860QueueName7E8ADBAB",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ShadowRenameerrorsF7E886D1": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "Lambda errors. Runbook: docs/operations/observability-and-runbook.md",
+        "AlarmName": "prime-prod-ShadowRename-errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Processing:ExportsOutputRefShadowRename90956408E183C453",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesa2xfailedAEDCF23F": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-a2x execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-a2x-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesa2xtimedout901D712C": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-a2x timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-a2x-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesa2xtransferfailed126FF52D": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-a2x-transfer execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-a2x-transfer-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesa2xtransfertimedout779BA98C": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-a2x-transfer timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-a2x-transfer-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesbdafailedD63E92D9": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-bda execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-bda-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesbdatimedoutC10107C2": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-bda timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-bda-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesmarketdatafailed0A73FD66": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-market-data execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-market-data-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesmarketdatatimedout89DA5533": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-market-data timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-market-data-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesoptionsdatafailedA2A2CAFD": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-options-data execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-options-data-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesoptionsdatatimedout8D278156": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-options-data timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-options-data-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesreferencedatafailed2701A0AF": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-reference-data execution failed. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-reference-data-failed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "gmprimeequitiesreferencedatatimedoutCE857FB1": {
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Ref": "AlertTopic2720D535",
+          },
+        ],
+        "AlarmDescription": "gm-prime-equities-reference-data timed out. Runbook: docs/operations/observability-and-runbook.md#transfer-failed",
+        "AlarmName": "prime-prod-gm-prime-equities-reference-data-timed-out",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Fn::ImportValue": "Prime-prod-Orchestration:ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsTimedOut",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`template snapshots (prod) orchestration 1`] = `
+{
+  "Outputs": {
+    "ExportsOutputFnGetAttA2xScheduleDlq4EEF2957QueueName2C6B8536": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputFnGetAttA2xScheduleDlq4EEF2957QueueName2C6B8536",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "A2xScheduleDlq4EEF2957",
+          "QueueName",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttJseScheduleDlq58400E37QueueName9B452DEA": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputFnGetAttJseScheduleDlq58400E37QueueName9B452DEA",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "JseScheduleDlq58400E37",
+          "QueueName",
+        ],
+      },
+    },
+    "ExportsOutputRefA2xOuter424DF65BB6D445FD": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefA2xOuter424DF65BB6D445FD",
+      },
+      "Value": {
+        "Ref": "A2xOuter424DF65B",
+      },
+    },
+    "ExportsOutputRefEquitiesDate1E2CDBA6F00F119D": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefEquitiesDate1E2CDBA6F00F119D",
+      },
+      "Value": {
+        "Ref": "EquitiesDate1E2CDBA6",
+      },
+    },
+    "ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefRetrievea2xStateMachineC099C9E2880A61FA",
+      },
+      "Value": {
+        "Ref": "Retrievea2xStateMachineC099C9E2",
+      },
+    },
+    "ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefRetrievebdaStateMachineDC4A1623C43B1340",
+      },
+      "Value": {
+        "Ref": "RetrievebdaStateMachineDC4A1623",
+      },
+    },
+    "ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefRetrievemarketDataStateMachine6AD0DE3F92CCA10E",
+      },
+      "Value": {
+        "Ref": "RetrievemarketDataStateMachine6AD0DE3F",
+      },
+    },
+    "ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefRetrieveoptionsDataStateMachine437421018DC30F2C",
+      },
+      "Value": {
+        "Ref": "RetrieveoptionsDataStateMachine43742101",
+      },
+    },
+    "ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983": {
+      "Export": {
+        "Name": "Prime-prod-Orchestration:ExportsOutputRefRetrievereferenceDataStateMachineCCD1B0D97F2B1983",
+      },
+      "Value": {
+        "Ref": "RetrievereferenceDataStateMachineCCD1B0D9",
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "A2xOuter424DF65B": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "A2xOuterRoleDefaultPolicyEE88A3F9",
+        "A2xOuterRole016A6CE0",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"DetermineDate","States":{"DetermineDate":{"Next":"TransferA2xFile","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","ResultPath":"$.date","Resource":"",
+              {
+                "Fn::GetAtt": [
+                  "EquitiesDate1E2CDBA6",
+                  "Arn",
+                ],
+              },
+              ""},"TransferA2xFile":{"End":true,"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::states:startExecution.sync:2","Parameters":{"Input":{"remoteFilePaths.$":"States.Array(States.Format('/outbound/equities/EQ_REF_{}.csv', $.date.businessDate))","AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$":"$$.Execution.Id"},"StateMachineArn":"",
+              {
+                "Ref": "Retrievea2xStateMachineC099C9E2",
+              },
+              ""}}},"TimeoutSeconds":1200}",
+            ],
+          ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "A2xOuterLogs4456DBBB",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "A2xOuterRole016A6CE0",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "gm-prime-equities-a2x",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TracingConfiguration": {
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "A2xOuterLogs4456DBBB": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-a2x",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "A2xOuterRole016A6CE0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "A2xOuterRoleDefaultPolicyEE88A3F9": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "EquitiesDate1E2CDBA6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "EquitiesDate1E2CDBA6",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "Retrievea2xStateMachineC099C9E2",
+              },
+            },
+            {
+              "Action": [
+                "states:DescribeExecution",
+                "states:StopExecution",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":states:af-south-1:333333333333:execution:",
+                    {
+                      "Fn::Select": [
+                        6,
+                        {
+                          "Fn::Split": [
+                            ":",
+                            {
+                              "Ref": "Retrievea2xStateMachineC099C9E2",
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    "*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "events:PutTargets",
+                "events:PutRule",
+                "events:DescribeRule",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":events:af-south-1:333333333333:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "A2xOuterRoleDefaultPolicyEE88A3F9",
+        "Roles": [
+          {
+            "Ref": "A2xOuterRole016A6CE0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "A2xScheduleDlq4EEF2957": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "gm-prime-scheduler-group-a2x-sftp-dlq",
+        "SqsManagedSseEnabled": true,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "A2xScheduleDlqPolicyA1044EFA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "A2xScheduleDlq4EEF2957",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "A2xScheduleDlq4EEF2957",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "A2xScheduleGroup711F0BC0": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Name": "gm-prime-scheduler-group-a2x-sftp",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Scheduler::ScheduleGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "EquitiesDate1E2CDBA6": {
+      "DependsOn": [
+        "EquitiesDateServiceRoleDefaultPolicyA7118716",
+        "EquitiesDateServiceRole6F6993A9",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-333333333333-af-south-1",
+          "S3Key": "<asset-hash>.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "POWERTOOLS_LOG_LEVEL": "INFO",
+            "POWERTOOLS_SERVICE_NAME": "gm-prime-equities-date",
+          },
+        },
+        "FunctionName": "gm-prime-equities-date",
+        "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "EquitiesDateLogs9920BAEC",
+          },
+        },
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "EquitiesDateServiceRole6F6993A9",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs24.x",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Timeout": 10,
+        "TracingConfig": {
+          "Mode": "Active",
+        },
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "EquitiesDateLogs9920BAEC": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/gm-prime-equities-date",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "EquitiesDateServiceRole6F6993A9": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EquitiesDateServiceRoleDefaultPolicyA7118716": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EquitiesDateServiceRoleDefaultPolicyA7118716",
+        "Roles": [
+          {
+            "Ref": "EquitiesDateServiceRole6F6993A9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "JseScheduleDlq58400E37": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "gm-prime-scheduler-group-sftp-dlq",
+        "SqsManagedSseEnabled": true,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "JseScheduleDlqPolicy3DF2A8BC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "JseScheduleDlq58400E37",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "JseScheduleDlq58400E37",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "JseScheduleGroup09A6B2E2": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Name": "gm-prime-scheduler-group-sftp",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Scheduler::ScheduleGroup",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "Retrievea2xLogsAC4DAEF1": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-a2x-transfer",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "Retrievea2xStateMachineC099C9E2": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "Retrievea2xStateMachineRoleDefaultPolicyFC387631",
+        "Retrievea2xStateMachineRole6B8491D3",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"StartFileTransfer","States":{"StartFileTransfer":{"Next":"WaitForTransfer","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.transfer","ResultSelector":{"TransferId.$":"$.TransferId"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:startFileTransfer","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttA2xSftpConnectorConnectorIdC09FE4FA",
+              },
+              "","RetrieveFilePaths.$":"$.remoteFilePaths","LocalDirectoryPath":"/",
+              {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+              },
+              "/a2x/ftp/reference-data/equities"}},"WaitForTransfer":{"Type":"Wait","Seconds":30,"Next":"ListFileTransferResults"},"EvaluateResult":{"Type":"Choice","Choices":[{"Not":{"Variable":"$.poll.Results[0].StatusCode","IsPresent":true},"Next":"WaitForTransfer"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"COMPLETED","Next":"Succeeded"},{"And":[{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED"},{"Variable":"$.poll.Results[0].FailureCode","IsPresent":true},{"Variable":"$.poll.Results[0].FailureCode","StringEquals":"FILE_NOT_FOUND"}],"Next":"FileNotAvailable"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED","Next":"TransferFailed"}],"Default":"WaitForTransfer"},"ListFileTransferResults":{"Next":"EvaluateResult","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.poll","ResultSelector":{"Results.$":"$.FileTransferResults"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:listFileTransferResults","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttA2xSftpConnectorConnectorIdC09FE4FA",
+              },
+              "","TransferId.$":"$.transfer.TransferId"}},"Succeeded":{"Type":"Succeed"},"FileNotAvailable":{"Type":"Succeed","Comment":"Remote file not published yet; the next schedule tick retries."},"TransferFailed":{"Type":"Fail","Error":"TransferFailed","CausePath":"States.JsonToString($.poll.Results[0])"}},"TimeoutSeconds":900}",
+            ],
+          ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "Retrievea2xLogsAC4DAEF1",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "Retrievea2xStateMachineRole6B8491D3",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "gm-prime-equities-a2x-transfer",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TracingConfiguration": {
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "Retrievea2xStateMachineRole6B8491D3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "Retrievea2xStateMachineRoleDefaultPolicyFC387631": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "transfer:StartFileTransfer",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttA2xSftpConnectorArn26AF1741",
+              },
+            },
+            {
+              "Action": "transfer:ListFileTransferResults",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttA2xSftpConnectorArn26AF1741",
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "Retrievea2xStateMachineRoleDefaultPolicyFC387631",
+        "Roles": [
+          {
+            "Ref": "Retrievea2xStateMachineRole6B8491D3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RetrievebdaLogs54D92CF1": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-bda",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrievebdaStateMachineDC4A1623": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RetrievebdaStateMachineRoleDefaultPolicy0CD18856",
+        "RetrievebdaStateMachineRole39D53F14",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"StartFileTransfer","States":{"StartFileTransfer":{"Next":"WaitForTransfer","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.transfer","ResultSelector":{"TransferId.$":"$.TransferId"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:startFileTransfer","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","RetrieveFilePaths.$":"$.remoteFilePaths","LocalDirectoryPath":"/",
+              {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+              },
+              "/jse/idp/bda/temp"}},"WaitForTransfer":{"Type":"Wait","Seconds":30,"Next":"ListFileTransferResults"},"EvaluateResult":{"Type":"Choice","Choices":[{"Not":{"Variable":"$.poll.Results[0].StatusCode","IsPresent":true},"Next":"WaitForTransfer"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"COMPLETED","Next":"Succeeded"},{"And":[{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED"},{"Variable":"$.poll.Results[0].FailureCode","IsPresent":true},{"Variable":"$.poll.Results[0].FailureCode","StringEquals":"FILE_NOT_FOUND"}],"Next":"FileNotAvailable"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED","Next":"TransferFailed"}],"Default":"WaitForTransfer"},"ListFileTransferResults":{"Next":"EvaluateResult","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.poll","ResultSelector":{"Results.$":"$.FileTransferResults"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:listFileTransferResults","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","TransferId.$":"$.transfer.TransferId"}},"Succeeded":{"Type":"Succeed"},"FileNotAvailable":{"Type":"Succeed","Comment":"Remote file not published yet; the next schedule tick retries."},"TransferFailed":{"Type":"Fail","Error":"TransferFailed","CausePath":"States.JsonToString($.poll.Results[0])"}},"TimeoutSeconds":900}",
+            ],
+          ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "RetrievebdaLogs54D92CF1",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "RetrievebdaStateMachineRole39D53F14",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "gm-prime-equities-bda",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TracingConfiguration": {
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrievebdaStateMachineRole39D53F14": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RetrievebdaStateMachineRoleDefaultPolicy0CD18856": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "transfer:StartFileTransfer",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": "transfer:ListFileTransferResults",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RetrievebdaStateMachineRoleDefaultPolicy0CD18856",
+        "Roles": [
+          {
+            "Ref": "RetrievebdaStateMachineRole39D53F14",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RetrievemarketDataLogsD96D763C": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-market-data",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrievemarketDataStateMachine6AD0DE3F": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RetrievemarketDataStateMachineRoleDefaultPolicy5A88386A",
+        "RetrievemarketDataStateMachineRole0389303A",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"StartFileTransfer","States":{"StartFileTransfer":{"Next":"WaitForTransfer","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.transfer","ResultSelector":{"TransferId.$":"$.TransferId"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:startFileTransfer","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","RetrieveFilePaths.$":"$.remoteFilePaths","LocalDirectoryPath":"/",
+              {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+              },
+              "/jse/idp/market-data/equities/temp"}},"WaitForTransfer":{"Type":"Wait","Seconds":30,"Next":"ListFileTransferResults"},"EvaluateResult":{"Type":"Choice","Choices":[{"Not":{"Variable":"$.poll.Results[0].StatusCode","IsPresent":true},"Next":"WaitForTransfer"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"COMPLETED","Next":"Succeeded"},{"And":[{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED"},{"Variable":"$.poll.Results[0].FailureCode","IsPresent":true},{"Variable":"$.poll.Results[0].FailureCode","StringEquals":"FILE_NOT_FOUND"}],"Next":"FileNotAvailable"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED","Next":"TransferFailed"}],"Default":"WaitForTransfer"},"ListFileTransferResults":{"Next":"EvaluateResult","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.poll","ResultSelector":{"Results.$":"$.FileTransferResults"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:listFileTransferResults","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","TransferId.$":"$.transfer.TransferId"}},"Succeeded":{"Type":"Succeed"},"FileNotAvailable":{"Type":"Succeed","Comment":"Remote file not published yet; the next schedule tick retries."},"TransferFailed":{"Type":"Fail","Error":"TransferFailed","CausePath":"States.JsonToString($.poll.Results[0])"}},"TimeoutSeconds":900}",
+            ],
+          ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "RetrievemarketDataLogsD96D763C",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "RetrievemarketDataStateMachineRole0389303A",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "gm-prime-equities-market-data",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TracingConfiguration": {
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrievemarketDataStateMachineRole0389303A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RetrievemarketDataStateMachineRoleDefaultPolicy5A88386A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "transfer:StartFileTransfer",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": "transfer:ListFileTransferResults",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RetrievemarketDataStateMachineRoleDefaultPolicy5A88386A",
+        "Roles": [
+          {
+            "Ref": "RetrievemarketDataStateMachineRole0389303A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RetrieveoptionsDataLogsDA11B1FA": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-options-data",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrieveoptionsDataStateMachine43742101": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RetrieveoptionsDataStateMachineRoleDefaultPolicy8BDCA0F7",
+        "RetrieveoptionsDataStateMachineRoleCBA03FA2",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"StartFileTransfer","States":{"StartFileTransfer":{"Next":"WaitForTransfer","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.transfer","ResultSelector":{"TransferId.$":"$.TransferId"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:startFileTransfer","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","RetrieveFilePaths.$":"$.remoteFilePaths","LocalDirectoryPath":"/",
+              {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+              },
+              "/jse/idp/market-data/options/temp"}},"WaitForTransfer":{"Type":"Wait","Seconds":30,"Next":"ListFileTransferResults"},"EvaluateResult":{"Type":"Choice","Choices":[{"Not":{"Variable":"$.poll.Results[0].StatusCode","IsPresent":true},"Next":"WaitForTransfer"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"COMPLETED","Next":"Succeeded"},{"And":[{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED"},{"Variable":"$.poll.Results[0].FailureCode","IsPresent":true},{"Variable":"$.poll.Results[0].FailureCode","StringEquals":"FILE_NOT_FOUND"}],"Next":"FileNotAvailable"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED","Next":"TransferFailed"}],"Default":"WaitForTransfer"},"ListFileTransferResults":{"Next":"EvaluateResult","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.poll","ResultSelector":{"Results.$":"$.FileTransferResults"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:listFileTransferResults","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","TransferId.$":"$.transfer.TransferId"}},"Succeeded":{"Type":"Succeed"},"FileNotAvailable":{"Type":"Succeed","Comment":"Remote file not published yet; the next schedule tick retries."},"TransferFailed":{"Type":"Fail","Error":"TransferFailed","CausePath":"States.JsonToString($.poll.Results[0])"}},"TimeoutSeconds":900}",
+            ],
+          ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "RetrieveoptionsDataLogsDA11B1FA",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "RetrieveoptionsDataStateMachineRoleCBA03FA2",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "gm-prime-equities-options-data",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TracingConfiguration": {
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrieveoptionsDataStateMachineRoleCBA03FA2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RetrieveoptionsDataStateMachineRoleDefaultPolicy8BDCA0F7": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "transfer:StartFileTransfer",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": "transfer:ListFileTransferResults",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RetrieveoptionsDataStateMachineRoleDefaultPolicy8BDCA0F7",
+        "Roles": [
+          {
+            "Ref": "RetrieveoptionsDataStateMachineRoleCBA03FA2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "RetrievereferenceDataLogs08531EB2": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/vendedlogs/states/gm-prime-equities-reference-data",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrievereferenceDataStateMachineCCD1B0D9": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "RetrievereferenceDataStateMachineRoleDefaultPolicy3150C1F2",
+        "RetrievereferenceDataStateMachineRoleAEF53235",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"StartFileTransfer","States":{"StartFileTransfer":{"Next":"WaitForTransfer","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.transfer","ResultSelector":{"TransferId.$":"$.TransferId"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:startFileTransfer","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","RetrieveFilePaths.$":"$.remoteFilePaths","LocalDirectoryPath":"/",
+              {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+              },
+              "/jse/idp/market-data/reference/temp"}},"WaitForTransfer":{"Type":"Wait","Seconds":30,"Next":"ListFileTransferResults"},"EvaluateResult":{"Type":"Choice","Choices":[{"Not":{"Variable":"$.poll.Results[0].StatusCode","IsPresent":true},"Next":"WaitForTransfer"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"COMPLETED","Next":"Succeeded"},{"And":[{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED"},{"Variable":"$.poll.Results[0].FailureCode","IsPresent":true},{"Variable":"$.poll.Results[0].FailureCode","StringEquals":"FILE_NOT_FOUND"}],"Next":"FileNotAvailable"},{"Variable":"$.poll.Results[0].StatusCode","StringEquals":"FAILED","Next":"TransferFailed"}],"Default":"WaitForTransfer"},"ListFileTransferResults":{"Next":"EvaluateResult","Retry":[{"ErrorEquals":["Transfer.ThrottlingException","Transfer.ServiceUnavailableException","Transfer.InternalServiceError"],"IntervalSeconds":2,"MaxAttempts":5,"BackoffRate":2,"JitterStrategy":"FULL"}],"Type":"Task","ResultPath":"$.poll","ResultSelector":{"Results.$":"$.FileTransferResults"},"Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:transfer:listFileTransferResults","Parameters":{"ConnectorId":"",
+              {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+              },
+              "","TransferId.$":"$.transfer.TransferId"}},"Succeeded":{"Type":"Succeed"},"FileNotAvailable":{"Type":"Succeed","Comment":"Remote file not published yet; the next schedule tick retries."},"TransferFailed":{"Type":"Fail","Error":"TransferFailed","CausePath":"States.JsonToString($.poll.Results[0])"}},"TimeoutSeconds":900}",
+            ],
+          ],
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "RetrievereferenceDataLogs08531EB2",
+                    "Arn",
+                  ],
+                },
+              },
+            },
+          ],
+          "IncludeExecutionData": false,
+          "Level": "ERROR",
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "RetrievereferenceDataStateMachineRoleAEF53235",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "gm-prime-equities-reference-data",
+        "StateMachineType": "STANDARD",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "TracingConfiguration": {
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "RetrievereferenceDataStateMachineRoleAEF53235": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "RetrievereferenceDataStateMachineRoleDefaultPolicy3150C1F2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "transfer:StartFileTransfer",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": "transfer:ListFileTransferResults",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "RetrievereferenceDataStateMachineRoleDefaultPolicy3150C1F2",
+        "Roles": [
+          {
+            "Ref": "RetrievereferenceDataStateMachineRoleAEF53235",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "Schedulea2xScheduleFA894B1F": {
+      "Properties": {
+        "FlexibleTimeWindow": {
+          "Mode": "OFF",
+        },
+        "GroupName": "gm-prime-scheduler-group-a2x-sftp",
+        "Name": "gm-prime-equities-sftp-a2x",
+        "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Africa/Johannesburg",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Ref": "A2xOuter424DF65B",
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "A2xScheduleDlq4EEF2957",
+                "Arn",
+              ],
+            },
+          },
+          "Input": "{}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 3,
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRoleForTargetf7c00573DCBE82",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::Scheduler::Schedule",
+    },
+    "SchedulebdaSchedule8518F1AF": {
+      "Properties": {
+        "FlexibleTimeWindow": {
+          "Mode": "OFF",
+        },
+        "GroupName": "gm-prime-scheduler-group-sftp",
+        "Name": "gm-prime-equities-sftp-bda",
+        "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Africa/Johannesburg",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Ref": "RetrievebdaStateMachineDC4A1623",
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "JseScheduleDlq58400E37",
+                "Arn",
+              ],
+            },
+          },
+          "Input": "{"remoteFilePaths":["/outbound/bda/BDA_FILE.csv"]}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 3,
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRoleForTarget59a9f9D8E5C3D1",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::Scheduler::Schedule",
+    },
+    "SchedulemarketDataScheduleA231F26D": {
+      "Properties": {
+        "FlexibleTimeWindow": {
+          "Mode": "OFF",
+        },
+        "GroupName": "gm-prime-scheduler-group-sftp",
+        "Name": "gm-prime-equities-sftp-market-data",
+        "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Africa/Johannesburg",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Ref": "RetrievemarketDataStateMachine6AD0DE3F",
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "JseScheduleDlq58400E37",
+                "Arn",
+              ],
+            },
+          },
+          "Input": "{"remoteFilePaths":["/outbound/market-data/equities/EQUITIES_FILE.csv"]}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 3,
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRoleForTargete4a788B8DC1F0F",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::Scheduler::Schedule",
+    },
+    "ScheduleoptionsDataScheduleA46156A6": {
+      "Properties": {
+        "FlexibleTimeWindow": {
+          "Mode": "OFF",
+        },
+        "GroupName": "gm-prime-scheduler-group-sftp",
+        "Name": "gm-prime-equities-sftp-options-data",
+        "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Africa/Johannesburg",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Ref": "RetrieveoptionsDataStateMachine43742101",
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "JseScheduleDlq58400E37",
+                "Arn",
+              ],
+            },
+          },
+          "Input": "{"remoteFilePaths":["/outbound/market-data/options/OPTIONS_FILE.csv"]}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 3,
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRoleForTarget3dd1274A3A304E",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::Scheduler::Schedule",
+    },
+    "SchedulerRoleForTarget3dd1274A3A304E": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "JseScheduleGroup09A6B2E2",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SchedulerRoleForTarget3dd127DefaultPolicy6FC1258B": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "RetrieveoptionsDataStateMachine43742101",
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "JseScheduleDlq58400E37",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SchedulerRoleForTarget3dd127DefaultPolicy6FC1258B",
+        "Roles": [
+          {
+            "Ref": "SchedulerRoleForTarget3dd1274A3A304E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SchedulerRoleForTarget59a9f9D8E5C3D1": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "JseScheduleGroup09A6B2E2",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SchedulerRoleForTarget59a9f9DefaultPolicy01E968CE": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "RetrievebdaStateMachineDC4A1623",
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "JseScheduleDlq58400E37",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SchedulerRoleForTarget59a9f9DefaultPolicy01E968CE",
+        "Roles": [
+          {
+            "Ref": "SchedulerRoleForTarget59a9f9D8E5C3D1",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SchedulerRoleForTargetafd6a018D6FBB7": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "JseScheduleGroup09A6B2E2",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SchedulerRoleForTargetafd6a0DefaultPolicyFF065432": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "RetrievereferenceDataStateMachineCCD1B0D9",
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "JseScheduleDlq58400E37",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SchedulerRoleForTargetafd6a0DefaultPolicyFF065432",
+        "Roles": [
+          {
+            "Ref": "SchedulerRoleForTargetafd6a018D6FBB7",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SchedulerRoleForTargete4a788B8DC1F0F": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "JseScheduleGroup09A6B2E2",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SchedulerRoleForTargete4a788DefaultPolicyFCC031AB": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "RetrievemarketDataStateMachine6AD0DE3F",
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "JseScheduleDlq58400E37",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SchedulerRoleForTargete4a788DefaultPolicyFCC031AB",
+        "Roles": [
+          {
+            "Ref": "SchedulerRoleForTargete4a788B8DC1F0F",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SchedulerRoleForTargetf7c00573DCBE82": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "A2xScheduleGroup711F0BC0",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SchedulerRoleForTargetf7c005DefaultPolicy25D712F3": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "A2xOuter424DF65B",
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "A2xScheduleDlq4EEF2957",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SchedulerRoleForTargetf7c005DefaultPolicy25D712F3",
+        "Roles": [
+          {
+            "Ref": "SchedulerRoleForTargetf7c00573DCBE82",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SchedulereferenceDataScheduleF22700EF": {
+      "Properties": {
+        "FlexibleTimeWindow": {
+          "Mode": "OFF",
+        },
+        "GroupName": "gm-prime-scheduler-group-sftp",
+        "Name": "gm-prime-equities-sftp-reference-data",
+        "ScheduleExpression": "cron(0/30 3-6 ? * MON-FRI *)",
+        "ScheduleExpressionTimezone": "Africa/Johannesburg",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": {
+            "Ref": "RetrievereferenceDataStateMachineCCD1B0D9",
+          },
+          "DeadLetterConfig": {
+            "Arn": {
+              "Fn::GetAtt": [
+                "JseScheduleDlq58400E37",
+                "Arn",
+              ],
+            },
+          },
+          "Input": "{"remoteFilePaths":["/outbound/market-data/reference/REFERENCE_FILE.csv"]}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 3600,
+            "MaximumRetryAttempts": 3,
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRoleForTargetafd6a018D6FBB7",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::Scheduler::Schedule",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`template snapshots (prod) processing 1`] = `
+{
+  "Outputs": {
+    "ExportsOutputFnGetAttShadowRenameDlq4BD9C860QueueName7E8ADBAB": {
+      "Export": {
+        "Name": "Prime-prod-Processing:ExportsOutputFnGetAttShadowRenameDlq4BD9C860QueueName7E8ADBAB",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "ShadowRenameDlq4BD9C860",
+          "QueueName",
+        ],
+      },
+    },
+    "ExportsOutputRefShadowRename90956408E183C453": {
+      "Export": {
+        "Name": "Prime-prod-Processing:ExportsOutputRefShadowRename90956408E183C453",
+      },
+      "Value": {
+        "Ref": "ShadowRename90956408",
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "JseTempObjectCreatedAllowEventRulePrimeprodProcessingShadowRename9A9A0DBA044ED65B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "ShadowRename90956408",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "JseTempObjectCreatedCFA65C89",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "JseTempObjectCreatedCFA65C89": {
+      "Properties": {
+        "Description": "Invoke Shadow-Rename when a file lands in a JSE temp/ folder",
+        "EventPattern": {
+          "detail": {
+            "bucket": {
+              "name": [
+                {
+                  "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+                },
+              ],
+            },
+            "object": {
+              "key": [
+                {
+                  "wildcard": "jse/idp/*/temp/*",
+                },
+              ],
+            },
+          },
+          "detail-type": [
+            "Object Created",
+          ],
+          "source": [
+            "aws.s3",
+          ],
+        },
+        "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "ShadowRename90956408",
+                "Arn",
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "ShadowRenameDlq4BD9C860",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumEventAgeInSeconds": 7200,
+              "MaximumRetryAttempts": 4,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "ShadowRename90956408": {
+      "DependsOn": [
+        "ShadowRenameServiceRoleDefaultPolicy6E867AB0",
+        "ShadowRenameServiceRoleF681CE1D",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-333333333333-af-south-1",
+          "S3Key": "<asset-hash>.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "POWERTOOLS_LOG_LEVEL": "INFO",
+            "POWERTOOLS_SERVICE_NAME": "shadow-rename",
+          },
+        },
+        "FunctionName": "Shadow-Rename",
+        "Handler": "app.lambda_handler",
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "ShadowRenameLogs5C6F2339",
+          },
+        },
+        "MemorySize": 512,
+        "ReservedConcurrentExecutions": 1,
+        "Role": {
+          "Fn::GetAtt": [
+            "ShadowRenameServiceRoleF681CE1D",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.14",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Timeout": 300,
+        "TracingConfig": {
+          "Mode": "Active",
+        },
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "ShadowRenameDlq4BD9C860": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "shadow-rename-dlq",
+        "SqsManagedSseEnabled": true,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ShadowRenameDlqPolicy7C7F445D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ShadowRenameDlq4BD9C860",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "JseTempObjectCreatedCFA65C89",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ShadowRenameDlq4BD9C860",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulePrimeprodProcessingJseTempObjectCreatedBD4391D7",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "ShadowRenameDlq4BD9C860",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "ShadowRenameLogs5C6F2339": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/Shadow-Rename",
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "ShadowRenameServiceRoleDefaultPolicy6E867AB0": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                      },
+                      "/jse/idp/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                    },
+                    "/jse/idp/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Decrypt",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+            {
+              "Action": "s3:DeleteObject*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                    },
+                    "/jse/idp/*/temp/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ShadowRenameServiceRoleDefaultPolicy6E867AB0",
+        "Roles": [
+          {
+            "Ref": "ShadowRenameServiceRoleF681CE1D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "ShadowRenameServiceRoleF681CE1D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`template snapshots (prod) storage 1`] = `
+{
+  "Outputs": {
+    "ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6": {
+      "Export": {
+        "Name": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "DataKey17AFBB84",
+          "Arn",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB": {
+      "Export": {
+        "Name": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "FileDownloadsE63CA6D5",
+          "Arn",
+        ],
+      },
+    },
+    "ExportsOutputRefFileDownloadsE63CA6D57E8C2F15": {
+      "Export": {
+        "Name": "Prime-prod-Storage:ExportsOutputRefFileDownloadsE63CA6D57E8C2F15",
+      },
+      "Value": {
+        "Ref": "FileDownloadsE63CA6D5",
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691": {
+      "DependsOn": [
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+      ],
+      "Properties": {
+        "Code": {
+          "ZipFile": "import boto3  # type: ignore
+import json
+import logging
+import urllib.request
+
+s3 = boto3.client("s3")
+
+EVENTBRIDGE_CONFIGURATION = 'EventBridgeConfiguration'
+CONFIGURATION_TYPES = ["TopicConfigurations", "QueueConfigurations", "LambdaFunctionConfigurations"]
+
+def handler(event: dict, context):
+  response_status = "SUCCESS"
+  error_message = ""
+  try:
+    props = event["ResourceProperties"]
+    notification_configuration = props["NotificationConfiguration"]
+    managed = props.get('Managed', 'true').lower() == 'true'
+    skipDestinationValidation = props.get('SkipDestinationValidation', 'false').lower() == 'true'
+    stack_id = event['StackId']
+    old = event.get("OldResourceProperties", {}).get("NotificationConfiguration", {})
+    if managed:
+      config = handle_managed(event["RequestType"], notification_configuration)
+    else:
+      config = handle_unmanaged(props["BucketName"], stack_id, event["RequestType"], notification_configuration, old)
+    s3.put_bucket_notification_configuration(Bucket=props["BucketName"], NotificationConfiguration=config, SkipDestinationValidation=skipDestinationValidation)
+  except Exception as e:
+    logging.exception("Failed to put bucket notification configuration")
+    response_status = "FAILED"
+    error_message = f"Error: {str(e)}. "
+  finally:
+    submit_response(event, context, response_status, error_message)
+
+def handle_managed(request_type, notification_configuration):
+  if request_type == 'Delete':
+    return {}
+  return notification_configuration
+
+def handle_unmanaged(bucket, stack_id, request_type, notification_configuration, old):
+  def get_id(n):
+    n['Id'] = ''
+    sorted_notifications = sort_filter_rules(n)
+    strToHash=json.dumps(sorted_notifications, sort_keys=True).replace('"Name": "prefix"', '"Name": "Prefix"').replace('"Name": "suffix"', '"Name": "Suffix"')
+    return f"{stack_id}-{hash(strToHash)}"
+  def with_id(n):
+    n['Id'] = get_id(n)
+    return n
+
+  external_notifications = {}
+  existing_notifications = s3.get_bucket_notification_configuration(Bucket=bucket)
+  for t in CONFIGURATION_TYPES:
+    if request_type == 'Update':
+        old_incoming_ids = [get_id(n) for n in old.get(t, [])]
+        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not get_id(n) in old_incoming_ids]      
+    elif request_type == 'Delete':
+        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f"{stack_id}-")]
+    elif request_type == 'Create':
+        external_notifications[t] = [n for n in existing_notifications.get(t, [])]
+  if EVENTBRIDGE_CONFIGURATION in existing_notifications:
+    external_notifications[EVENTBRIDGE_CONFIGURATION] = existing_notifications[EVENTBRIDGE_CONFIGURATION]
+
+  if request_type == 'Delete':
+    return external_notifications
+
+  notifications = {}
+  for t in CONFIGURATION_TYPES:
+    external = external_notifications.get(t, [])
+    incoming = [with_id(n) for n in notification_configuration.get(t, [])]
+    notifications[t] = external + incoming
+
+  if EVENTBRIDGE_CONFIGURATION in notification_configuration:
+    notifications[EVENTBRIDGE_CONFIGURATION] = notification_configuration[EVENTBRIDGE_CONFIGURATION]
+  elif EVENTBRIDGE_CONFIGURATION in external_notifications:
+    notifications[EVENTBRIDGE_CONFIGURATION] = external_notifications[EVENTBRIDGE_CONFIGURATION]
+
+  return notifications
+
+def submit_response(event: dict, context, response_status: str, error_message: str):
+  response_body = json.dumps(
+    {
+      "Status": response_status,
+      "Reason": f"{error_message}See the details in CloudWatch Log Stream: {context.log_stream_name}",
+      "PhysicalResourceId": event.get("PhysicalResourceId") or event["LogicalResourceId"],
+      "StackId": event["StackId"],
+      "RequestId": event["RequestId"],
+      "LogicalResourceId": event["LogicalResourceId"],
+      "NoEcho": False,
+    }
+  ).encode("utf-8")
+  headers = {"content-type": "", "content-length": str(len(response_body))}
+  try:
+    req = urllib.request.Request(url=event["ResponseURL"], headers=headers, data=response_body, method="PUT")
+    with urllib.request.urlopen(req) as response:
+      print(response.read().decode("utf-8"))
+    print("Status code: " + response.reason)
+  except Exception as e:
+      print("send(..) failed executing request.urlopen(..): " + str(e))
+
+def sort_filter_rules(json_obj):
+  if not isinstance(json_obj, dict):
+      return json_obj
+  for key, value in json_obj.items():
+      if isinstance(value, dict):
+          json_obj[key] = sort_filter_rules(value)
+      elif isinstance(value, list):
+          json_obj[key] = [sort_filter_rules(item) for item in value]
+  if "Filter" in json_obj and "Key" in json_obj["Filter"] and "FilterRules" in json_obj["Filter"]["Key"]:
+      filter_rules = json_obj["Filter"]["Key"]["FilterRules"]
+      sorted_filter_rules = sorted(filter_rules, key=lambda x: x["Name"])
+      json_obj["Filter"]["Key"]["FilterRules"] = sorted_filter_rules
+  return json_obj",
+        },
+        "Description": "AWS CloudFormation handler for "Custom::S3BucketNotifications" resources (@aws-cdk/aws-s3)",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.13",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "DataKey17AFBB84": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Description": "Encrypts the landing bucket, SFTP secrets and alert topic",
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Statement": [
+            {
+              "Action": "kms:*",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::333333333333:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "cloudwatch.amazonaws.com",
+                  "events.amazonaws.com",
+                ],
+              },
+              "Resource": "*",
+              "Sid": "AllowAlertPublishersToUseKey",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.af-south-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::333333333333:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:CreateGrant",
+                "kms:DescribeKey",
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.af-south-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::333333333333:root",
+                    ],
+                  ],
+                },
+              },
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::KMS::Key",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "DataKeyAliasF989EB84": {
+      "Properties": {
+        "AliasName": "alias/prime-prod-file-downloads",
+        "TargetKeyId": {
+          "Fn::GetAtt": [
+            "DataKey17AFBB84",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::KMS::Alias",
+    },
+    "FileDownloadsE63CA6D5": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "BucketKeyEnabled": true,
+              "ServerSideEncryptionByDefault": {
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": [
+                    "DataKey17AFBB84",
+                    "Arn",
+                  ],
+                },
+                "SSEAlgorithm": "aws:kms",
+              },
+            },
+          ],
+        },
+        "BucketName": "prime-prod-file-downloads",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "noncurrent-versions",
+              "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 90,
+              },
+              "Status": "Enabled",
+            },
+            {
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1,
+              },
+              "Id": "abort-incomplete-mpu",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 7,
+              "Id": "expire-temp-bda",
+              "Prefix": "jse/idp/bda/temp/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 7,
+              "Id": "expire-temp-marketData",
+              "Prefix": "jse/idp/market-data/equities/temp/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 7,
+              "Id": "expire-temp-referenceData",
+              "Prefix": "jse/idp/market-data/reference/temp/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 7,
+              "Id": "expire-temp-optionsData",
+              "Prefix": "jse/idp/market-data/options/temp/",
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "FileDownloadsNotificationsDD2F5B4E": {
+      "DependsOn": [
+        "FileDownloadsNotificationsHandlerPolicyF915401D",
+        "FileDownloadsPolicy99B4078F",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "FileDownloadsE63CA6D5",
+        },
+        "Managed": true,
+        "NotificationConfiguration": {
+          "EventBridgeConfiguration": {},
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+            "Arn",
+          ],
+        },
+        "SkipDestinationValidation": false,
+      },
+      "Type": "Custom::S3BucketNotifications",
+    },
+    "FileDownloadsNotificationsHandlerPolicyF915401D": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutBucketNotification",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "FileDownloadsE63CA6D5",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "FileDownloadsNotificationsHandlerPolicyF915401D",
+        "Roles": [
+          {
+            "Ref": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "FileDownloadsPolicy99B4078F": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "FileDownloadsE63CA6D5",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FileDownloadsE63CA6D5",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FileDownloadsE63CA6D5",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "NumericLessThan": {
+                  "s3:TlsVersion": 1.2,
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FileDownloadsE63CA6D5",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FileDownloadsE63CA6D5",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`template snapshots (prod) transfer 1`] = `
+{
+  "Outputs": {
+    "A2xConnectorEgressIps": {
+      "Description": "Send to the vendor for allowlisting",
+      "Value": {
+        "Fn::Join": [
+          ",",
+          {
+            "Fn::GetAtt": [
+              "A2xSftpConnector",
+              "ServiceManagedEgressIpAddresses",
+            ],
+          },
+        ],
+      },
+    },
+    "A2xConnectorId": {
+      "Value": {
+        "Fn::GetAtt": [
+          "A2xSftpConnector",
+          "ConnectorId",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttA2xSftpConnectorArn26AF1741": {
+      "Export": {
+        "Name": "Prime-prod-Transfer:ExportsOutputFnGetAttA2xSftpConnectorArn26AF1741",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "A2xSftpConnector",
+          "Arn",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttA2xSftpConnectorConnectorIdC09FE4FA": {
+      "Export": {
+        "Name": "Prime-prod-Transfer:ExportsOutputFnGetAttA2xSftpConnectorConnectorIdC09FE4FA",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "A2xSftpConnector",
+          "ConnectorId",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59": {
+      "Export": {
+        "Name": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorArn255FFB59",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "JseIdpSftpConnector",
+          "Arn",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA": {
+      "Export": {
+        "Name": "Prime-prod-Transfer:ExportsOutputFnGetAttJseIdpSftpConnectorConnectorIdA6DDD2DA",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "JseIdpSftpConnector",
+          "ConnectorId",
+        ],
+      },
+    },
+    "JseIdpConnectorEgressIps": {
+      "Description": "Send to the vendor for allowlisting",
+      "Value": {
+        "Fn::Join": [
+          ",",
+          {
+            "Fn::GetAtt": [
+              "JseIdpSftpConnector",
+              "ServiceManagedEgressIpAddresses",
+            ],
+          },
+        ],
+      },
+    },
+    "JseIdpConnectorId": {
+      "Value": {
+        "Fn::GetAtt": [
+          "JseIdpSftpConnector",
+          "ConnectorId",
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "A2xConnectorAccessRole0C51C347": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":transfer:af-south-1:333333333333:connector/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "transfer.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "A2x SFTP connector: write retrieved files to S3 and read its secret",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "A2xConnectorAccessRoleDefaultPolicy9533D2BA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                    },
+                    "/a2x/ftp/reference-data/equities/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Decrypt",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+            {
+              "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+              },
+            },
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "A2xSftpSecret7D086062",
+              },
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.af-south-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "A2xConnectorAccessRoleDefaultPolicy9533D2BA",
+        "Roles": [
+          {
+            "Ref": "A2xConnectorAccessRole0C51C347",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "A2xConnectorLogs191511EA": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/transfer/",
+              {
+                "Fn::GetAtt": [
+                  "A2xSftpConnector",
+                  "ConnectorId",
+                ],
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "A2xSftpConnector": {
+      "Properties": {
+        "AccessRole": {
+          "Fn::GetAtt": [
+            "A2xConnectorAccessRole0C51C347",
+            "Arn",
+          ],
+        },
+        "LoggingRole": {
+          "Fn::GetAtt": [
+            "ConnectorLoggingRoleAC548066",
+            "Arn",
+          ],
+        },
+        "SftpConfig": {
+          "TrustedHostKeys": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIREPLACEMEWITHA2XHOSTKEY000000000000000000000",
+          ],
+          "UserSecretId": {
+            "Ref": "A2xSftpSecret7D086062",
+          },
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Url": "sftp://a2x-prod.example.invalid:22",
+      },
+      "Type": "AWS::Transfer::Connector",
+    },
+    "A2xSftpSecret7D086062": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Description": "A2x SFTP connector credentials as JSON with Username and PrivateKey or Password. Value is set out-of-band.",
+        "GenerateSecretString": {},
+        "KmsKeyId": {
+          "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+        },
+        "Name": "prime/prod/sftp/a2x",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::SecretsManager::Secret",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "ConnectorLoggingRoleAC548066": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":transfer:af-south-1:333333333333:connector/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "transfer.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "Lets Transfer Family connectors write CloudWatch Logs",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "ConnectorLoggingRoleDefaultPolicy40684229": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":logs:af-south-1:333333333333:log-group:/aws/transfer/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ConnectorLoggingRoleDefaultPolicy40684229",
+        "Roles": [
+          {
+            "Ref": "ConnectorLoggingRoleAC548066",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "JseIdpConnectorAccessRoleDefaultPolicyB7076FEC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+                    },
+                    "/jse/idp/*/temp/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kms:Encrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Decrypt",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+            {
+              "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttFileDownloadsE63CA6D5Arn964471FB",
+              },
+            },
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "JseIdpSftpSecret28DE7A4F",
+              },
+            },
+            {
+              "Action": "kms:Decrypt",
+              "Condition": {
+                "StringEquals": {
+                  "kms:ViaService": "secretsmanager.af-south-1.amazonaws.com",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "JseIdpConnectorAccessRoleDefaultPolicyB7076FEC",
+        "Roles": [
+          {
+            "Ref": "JseIdpConnectorAccessRoleECB5DED8",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "JseIdpConnectorAccessRoleECB5DED8": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":transfer:af-south-1:333333333333:connector/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": "333333333333",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "transfer.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Description": "JseIdp SFTP connector: write retrieved files to S3 and read its secret",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "JseIdpConnectorLogs0FA032DC": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/transfer/",
+              {
+                "Fn::GetAtt": [
+                  "JseIdpSftpConnector",
+                  "ConnectorId",
+                ],
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 90,
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "JseIdpSftpConnector": {
+      "Properties": {
+        "AccessRole": {
+          "Fn::GetAtt": [
+            "JseIdpConnectorAccessRoleECB5DED8",
+            "Arn",
+          ],
+        },
+        "LoggingRole": {
+          "Fn::GetAtt": [
+            "ConnectorLoggingRoleAC548066",
+            "Arn",
+          ],
+        },
+        "SftpConfig": {
+          "TrustedHostKeys": [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIREPLACEMEWITHJSEHOSTKEY000000000000000000000",
+          ],
+          "UserSecretId": {
+            "Ref": "JseIdpSftpSecret28DE7A4F",
+          },
+        },
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+        "Url": "sftp://jse-idp-prod.example.invalid:22",
+      },
+      "Type": "AWS::Transfer::Connector",
+    },
+    "JseIdpSftpSecret28DE7A4F": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "Description": "JseIdp SFTP connector credentials as JSON with Username and PrivateKey or Password. Value is set out-of-band.",
+        "GenerateSecretString": {},
+        "KmsKeyId": {
+          "Fn::ImportValue": "Prime-prod-Storage:ExportsOutputFnGetAttDataKey17AFBB84ArnCE2A1BC6",
+        },
+        "Name": "prime/prod/sftp/jse-idp",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "prod",
+          },
+        ],
+      },
+      "Type": "AWS::SecretsManager::Secret",
+      "UpdateReplacePolicy": "Retain",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

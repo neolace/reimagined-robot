@@ -1,0 +1,51 @@
+{
+  "name": "prime-sftp-ingestion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scheduled SFTP ingestion of A2X and JSE IDP equities files into S3 (AWS CDK, TypeScript)",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "jest",
+    "test:python": "cd src/lambdas/shadow_rename && python -m pytest -q",
+    "test:integration": "jest --config jest.integration.config.js",
+    "synth": "cdk synth --quiet",
+    "diff": "cdk diff",
+    "cdk": "cdk"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.272.0",
+    "cdk-nag": "^3.0.2",
+    "constructs": "^10.8.1",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@aws-lambda-powertools/logger": "^2.35.0",
+    "@aws-lambda-powertools/metrics": "^2.35.0",
+    "@aws-sdk/client-s3": "^3.1144.0",
+    "@aws-sdk/client-sfn": "^3.1144.0",
+    "@aws-sdk/client-sns": "^3.1144.0",
+    "@eslint/js": "^10.0.1",
+    "@types/aws-lambda": "^8.10.164",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.3",
+    "@types/ssh2-sftp-client": "^9.0.6",
+    "aws-cdk": "^2.1143.0",
+    "aws-sdk-client-mock": "^4.1.0",
+    "aws-sdk-client-mock-jest": "^4.1.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.5.2",
+    "prettier": "^3.9.9",
+    "ssh2-sftp-client": "^12.1.1",
+    "ts-jest": "^29.4.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.0"
+  }
+}

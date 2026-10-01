@@ -1,0 +1,45 @@
+name: Deploy
+
+# Build once, deploy many: the cloud assembly produced by CI is promoted dev -> uat -> prod.
+# uat and prod require approval through GitHub environment protection rules.
+# Each environment needs a variable AWS_DEPLOY_ROLE_ARN (OIDC role in that account).
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-dev:
+    if: github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/deploy-stage.yml
+    with:
+      environment: dev
+      run-id: ${{ github.event.workflow_run.id }}
+    secrets: inherit
+
+  deploy-uat:
+    needs: deploy-dev
+    uses: ./.github/workflows/deploy-stage.yml
+    with:
+      environment: uat
+      run-id: ${{ github.event.workflow_run.id }}
+    secrets: inherit
+
+  deploy-prod:
+    needs: deploy-uat
+    uses: ./.github/workflows/deploy-stage.yml
+    with:
+      environment: prod
+      run-id: ${{ github.event.workflow_run.id }}
+    secrets: inherit
